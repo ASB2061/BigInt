@@ -8,6 +8,7 @@
 
 
 class DoubleInt {
+public:
     DoubleInt(SafeInt i);
     DoubleInt(int i);
     DoubleInt();
@@ -16,7 +17,7 @@ class DoubleInt {
 
 
 
-    friend DoubleInt operator+();=
+    friend DoubleInt operator+();
 };
 
 
