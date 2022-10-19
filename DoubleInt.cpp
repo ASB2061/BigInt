@@ -23,7 +23,7 @@ DoubleInt::DoubleInt() {
 
 }
 
-DoubleInt operator+() {
+DoubleInt operator+(const int &lhs, const int &rhs) {
 
 }
 
