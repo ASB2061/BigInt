@@ -27,15 +27,52 @@ DoubleInt operator+() {
 
 }
 
-DoubleInt operator+() {
 
-}
-DoubleInt operator+() {
-
-}
-DoubleInt operator+() {
+DoubleInt operator+=() {
 
 }
 
+DoubleInt operator-() {
+
+}
+
+DoubleInt operator-=() {
+
+}
+
+DoubleInt operator*() {
+
+}
+DoubleInt operator/() {
+
+}
+
+DoubleInt operator==() {
+
+}
 
 
+DoubleInt operator>() {
+
+}
+
+
+DoubleInt operator<() {
+
+}
+
+
+DoubleInt operator<=() {
+
+}
+
+
+
+DoubleInt operator>=() {
+
+}
+
+
+DoubleInt operator!=() {
+
+}

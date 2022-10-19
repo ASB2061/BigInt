@@ -18,6 +18,8 @@ public:
 
 
     friend DoubleInt operator+();
+private:
+    DoubleInt theValue;
 };
 
 
