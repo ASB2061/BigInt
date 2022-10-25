@@ -7,6 +7,10 @@
 #include <exception>
 
 
+DoubleInt::DoubleInt() {
+
+}
+
 DoubleInt::DoubleInt(int i) {
     // we want something to change so that a doubleInt is returned
     // that represents int i
@@ -19,60 +23,13 @@ DoubleInt::DoubleInt(SafeInt i) {
     DoubleInt thingy = i;
 }
 
-DoubleInt::DoubleInt() {
+DoubleInt operator+(const DoubleInt &lhs, const int &rhs) {
 
 }
 
-DoubleInt operator+(const int &lhs, const int &rhs) {
+DoubleInt operator+(const DoubleInt &lhs, const DoubleInt &rhs) {
 
 }
-
-
-DoubleInt operator+=() {
-
-}
-
-DoubleInt operator-() {
-
-}
-
-DoubleInt operator-=() {
-
-}
-
-DoubleInt operator*() {
-
-}
-DoubleInt operator/() {
-
-}
-
-DoubleInt operator==() {
-
-}
-
-
-DoubleInt operator>() {
-
-}
-
-
-DoubleInt operator<() {
-
-}
-
-
-DoubleInt operator<=() {
-
-}
-
-
-
-DoubleInt operator>=() {
-
-}
-
-
-DoubleInt operator!=() {
+DoubleInt operator+(const DoubleInt &lhs, const SafeInt &rhs) {
 
 }

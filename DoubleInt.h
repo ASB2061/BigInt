@@ -17,7 +17,8 @@ public:
 
 
 
-    friend DoubleInt operator+();
+    friend DoubleInt operator+(const DoubleInt &lhs, const int &rhs);
+
 private:
     DoubleInt theValue;
 };
