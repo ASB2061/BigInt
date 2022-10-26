@@ -21,6 +21,7 @@ public:
 
     friend DoubleInt operator+(const DoubleInt &lhs, const int &rhs);
     friend DoubleInt operator+(const DoubleInt &lhs, const DoubleInt &rhs);
+
     friend DoubleInt operator-(const DoubleInt &lhs, const int &rhs);
     friend DoubleInt operator-(const DoubleInt &lhs, const DoubleInt &rhs);
 
@@ -44,15 +45,12 @@ public:
     friend bool operator==(const int &lhs, const DoubleInt &rhs);
     friend bool operator==(const DoubleInt &lhs, const int &rhs);
 
-
-
-
-
     static const DoubleIntBaseType MAX = 2147483647;
     static const DoubleIntBaseType MIN = -2147483648;
-private:
+
     int high32;
     int low32;
+    int sign;
 };
 
 

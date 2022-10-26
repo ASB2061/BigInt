@@ -15,7 +15,13 @@ DoubleInt::DoubleInt() {
 DoubleInt::DoubleInt(int i) {
     // we want something to change so that a doubleInt is returned
     // that represents int i
-    low32 = i;
+    sign = 0;
+    if (i > 0) {
+        sign = 1;
+    } else if (i < 0) {
+        sign = -1;
+    }
+    low32 = abs(i);
     high32 = 0;
 }
 
@@ -30,13 +36,23 @@ DoubleInt::DoubleInt(int i) {
 //
 //}
 
+DoubleInt operator+(const int &lhs, const DoubleInt &rhs) {
+    if (rhs.low32 > lhs && lhs > INTMAX_MAX - rhs.low32) { // if these are both true,
+
+    }
+}
+
 DoubleInt operator+(const DoubleInt &lhs, const int &rhs) {
 
 }
 
 
 DoubleInt operator+(const DoubleInt &lhs, const DoubleInt &rhs) {
+    if (lhs.sign > 0 && rhs.sign > 0) {
 
+    }   else if (lhs.sign > 0 && rhs.sign < 0) {
+
+    } else if ()
 }
 
 
@@ -48,15 +64,19 @@ DoubleInt operator-(const DoubleInt &lhs, const int &rhs) {
 
 }
 
+DoubleInt operator-(const int &lhs, const DoubleInt &rhs) {
+
+}
+
 bool operator>(const DoubleInt &lhs, const int &rhs) {
-    if (lhs.low32 > rhs) {
+    if (lhs.low32 > rhs || lhs.high32 > 0) {
         return true;
     }
     return false;
 }
 
 bool operator>(const int &lhs, const DoubleInt &rhs) {
-    if (lhs > rhs.low32) {
+    if (lhs > rhs.low32 && rhs.high32 == 0) {
         return true;
     }
     return false;
@@ -70,14 +90,14 @@ bool operator>(const DoubleInt &lhs, const DoubleInt &rhs) {
 }
 
 bool operator>=(const DoubleInt &lhs, const int &rhs) {
-    if (lhs.low32 >= rhs) {
+    if (lhs.low32 >= rhs || lhs.high32 > 0) {
         return true;
     }
     return false;
 }
 
 bool operator>=(const int &lhs, const DoubleInt &rhs) {
-    if (lhs >= rhs.low32) {
+    if (lhs >= rhs.low32 && rhs.high32 == 0) {
         return true;
     }
     return false;
