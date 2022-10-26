@@ -8,28 +8,129 @@
 
 
 DoubleInt::DoubleInt() {
-
+    low32 = 0;
+    high32 = 0;
 }
 
 DoubleInt::DoubleInt(int i) {
     // we want something to change so that a doubleInt is returned
     // that represents int i
-    DoubleInt transformed = i;
+    low32 = i;
+    high32 = 0;
 }
 
-DoubleInt::DoubleInt(SafeInt i) {
-    // we want something to change so that a doubleInt is returned
-    // that represents safeint i
-    DoubleInt thingy = i;
-}
+//DoubleInt::DoubleInt(SafeInt i) {
+//    // we want something to change so that a doubleInt is returned
+//    // that represents safeint i
+//    DoubleInt thingy = i;
+//}
 
 //friend int DoubleInt::DoubleIntTestFibo(int input) {
 //
 //
 //}
+
 DoubleInt operator+(const DoubleInt &lhs, const int &rhs) {
 
 }
+
+
+DoubleInt operator+(const DoubleInt &lhs, const DoubleInt &rhs) {
+
+}
+
+
+DoubleInt operator-(const DoubleInt &lhs, const DoubleInt &rhs) {
+
+}
+
+DoubleInt operator-(const DoubleInt &lhs, const int &rhs) {
+
+}
+
+bool operator>(const DoubleInt &lhs, const int &rhs) {
+    if (lhs.low32 > rhs) {
+        return true;
+    }
+    return false;
+}
+
+bool operator>(const int &lhs, const DoubleInt &rhs) {
+    if (lhs > rhs.low32) {
+        return true;
+    }
+    return false;
+}
+
+bool operator>(const DoubleInt &lhs, const DoubleInt &rhs) {
+    if (lhs.high32 > rhs.high32 || (lhs.high32 == rhs.high32 && lhs.low32 > rhs.low32)) {
+        return true;
+    }
+    return false;
+}
+
+bool operator>=(const DoubleInt &lhs, const int &rhs) {
+    if (lhs.low32 >= rhs) {
+        return true;
+    }
+    return false;
+}
+
+bool operator>=(const int &lhs, const DoubleInt &rhs) {
+    if (lhs >= rhs.low32) {
+        return true;
+    }
+    return false;
+}
+
+bool operator>=(const DoubleInt &lhs, const DoubleInt &rhs) {
+    if (lhs.high32 > rhs.high32 || (lhs.high32 == rhs.high32 && lhs.low32 > rhs.low32) || (lhs.high32 == rhs.high32 && lhs.low32 == rhs.low32)) {
+        return true;
+    }
+    return false;
+}
+
+bool operator<(const DoubleInt &lhs, const int &rhs) {
+
+}
+
+bool operator<(const int &lhs, const DoubleInt &rhs) {
+
+}
+
+bool operator<(const DoubleInt &lhs, const DoubleInt &rhs) {
+
+}
+
+bool operator<=(const DoubleInt &lhs, const int &rhs) {
+
+}
+
+bool operator<=(const int &lhs, const DoubleInt &rhs) {
+
+}
+
+bool operator<=(const DoubleInt &lhs, const DoubleInt &rhs) {
+
+}
+
+bool operator==(const DoubleInt &lhs, const int &rhs) {
+    if (lhs.high32 <= 0 && lhs.low32 == rhs) {
+        return true;
+    }
+    return false;
+}
+
+bool operator==(const int &lhs, const DoubleInt &rhs) {
+    if (lhs == rhs.low32) {
+        return true;
+    }
+}
+
+bool operator==(const DoubleInt &lhs, const DoubleInt &rhs) {
+
+}
+
 
 int DoubleIntTestFibo(int input) {
     if (input == 0) { // basic recursive design that will need to be fixed.
@@ -39,11 +140,4 @@ int DoubleIntTestFibo(int input) {
     } else {
         return DoubleIntTestFibo(input - 1) + DoubleIntTestFibo(input - 2);
     }
-}
-
-DoubleInt operator+(const DoubleInt &lhs, const DoubleInt &rhs) {
-
-}
-DoubleInt operator+(const DoubleInt &lhs, const SafeInt &rhs) {
-
 }

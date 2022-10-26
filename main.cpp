@@ -14,5 +14,4 @@ int main() {
     String_Demo();
     SafeInt_Demo();
     std::cout << "all done" << std::endl;
-    DoubleIntTestFibo(5);
 }
