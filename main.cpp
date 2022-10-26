@@ -6,6 +6,7 @@
 #include <iostream>  // access to I.O. Streams library, for std::cout and std::endl
 #include "SafeInt.h"
 #include "String.h"
+#include "DoubleInt.h"
 
 int main() {
     std::cout << "Hello, world" << std::endl;
@@ -13,4 +14,5 @@ int main() {
     String_Demo();
     SafeInt_Demo();
     std::cout << "all done" << std::endl;
+    DoubleIntTestFibo(5);
 }

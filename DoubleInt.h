@@ -12,7 +12,7 @@ public:
     DoubleInt(SafeInt i);
     DoubleInt(int i);
     DoubleInt();
-
+    friend int DoubleIntTestFibo(int input);
 
 
 
