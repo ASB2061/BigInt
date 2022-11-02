@@ -14,10 +14,11 @@ int main() {
     // need to add calls to test suite and/or user interface to work with the code here
     // String_Demo();
     // SafeInt_Demo();
-    DoubleIntTestSuite();
     unsigned int pie;
-    pie = UINT32_MAX + 1;
+    pie = UINT32_MAX + 17;
     std::cout << UINT32_MAX << "\n" << pie << std::endl;
+    DoubleIntTestSuite();
+
 //    DoubleInt fiboCount = DoubleInt(15);
 //    hccs_assert(DoubleIntTestFibonacci(fiboCount) == 610);
     std::cout << "all done" << std::endl;

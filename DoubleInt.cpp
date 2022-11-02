@@ -176,6 +176,7 @@ void DoubleIntTestSuite() {
     DoubleInt correctAnswerOne = DoubleInt(0, 1);
     DoubleInt testAnswer = testingVarOne + testingVarTwo;
     hccs_assert(correctAnswerOne == testAnswer);
+    hccs_assert(DoubleInt(32, 32) == DoubleInt(UINT32_MAX, 15) + DoubleInt(33,16));
 
     std::cout << "Testing complete!" << std::endl;
 }
