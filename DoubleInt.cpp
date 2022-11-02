@@ -9,13 +9,13 @@
 
 
 DoubleInt::DoubleInt() {
-    low32 = 0;
-    high32 = 0;
+    this->low32 = 0;
+    this->high32 = 0;
 }
 
 DoubleInt::DoubleInt(const DoubleInt &i) {
-    low32 = i.low32;
-    high32 = i.high32;
+    this->low32 = i.low32;
+    this->high32 = i.high32;
 }
 
 DoubleInt::DoubleInt(unsigned int i) {
@@ -24,8 +24,8 @@ DoubleInt::DoubleInt(unsigned int i) {
     hccs_assert(i >= 0); // i must be greater or equal to 0 since we are letting doubleint be unsigned.
                          // technically, the assert statement is not needed since we require an unsigned integer to
                          // intialize
-    low32 = i;
-    high32 = 0;
+    this->low32 = i;
+    this->high32 = 0;
 }
 
 //DoubleInt::DoubleInt(SafeInt i) {
@@ -51,12 +51,22 @@ DoubleInt operator+(const DoubleInt &lhs, const int &rhs) {
 
 
 DoubleInt operator+(const DoubleInt &lhs, const DoubleInt &rhs) {
+    hccs_assert(!(lhs.high32 > DoubleInt::MAX - rhs.high32));
+    // Essentially, we are trying to make sure that adding these two DoubleInts will not go over the storage limit of
+    // the DoubleInt class.
+    DoubleInt returnable = DoubleInt();
+    if (lhs.high32 == DoubleInt::MAX - rhs.high32) {
+        hccs_assert(lhs.low32 <= DoubleInt::MAX - rhs.low32);
+        // If the high bits add up to the maximum, the low bits have to not add to their maximum or there will be overflow.
+    }
 
 }
 
 
 DoubleInt operator-(const DoubleInt &lhs, const DoubleInt &rhs) {
+    if (lhs.high32 > 0) {
 
+    }
 }
 
 DoubleInt operator-(const DoubleInt &lhs, const int &rhs) {
