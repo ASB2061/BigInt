@@ -18,10 +18,10 @@ typedef int DoubleIntBaseType;
 class DoubleInt {
 public:
     // DoubleInt(SafeInt i);
+    DoubleInt();
     DoubleInt(unsigned int i);
     DoubleInt(DoubleInt const &i);
-    DoubleInt();
-
+    DoubleInt(unsigned int low, unsigned int high);
 
 
 
@@ -39,20 +39,17 @@ public:
     friend bool operator>=(const int &lhs, const DoubleInt &rhs);
     friend bool operator>=(const DoubleInt &lhs, const int &rhs);
 
-    friend bool operator<(const DoubleInt &lhs, const DoubleInt &rhs);
-    friend bool operator<(const int &lhs, const DoubleInt &rhs);
-    friend bool operator<(const DoubleInt &lhs, const int &rhs);
-
-    friend bool operator<=(const DoubleInt &lhs, const DoubleInt &rhs);
-    friend bool operator<=(const int &lhs, const DoubleInt &rhs);
-    friend bool operator<=(const DoubleInt &lhs, const int &rhs);
+//    friend bool operator<(const DoubleInt &lhs, const DoubleInt &rhs);
+//    friend bool operator<(const int &lhs, const DoubleInt &rhs);
+//    friend bool operator<(const DoubleInt &lhs, const int &rhs);
+//
+//    friend bool operator<=(const DoubleInt &lhs, const DoubleInt &rhs);
+//    friend bool operator<=(const int &lhs, const DoubleInt &rhs);
+//    friend bool operator<=(const DoubleInt &lhs, const int &rhs);
 
     friend bool operator==(const DoubleInt &lhs, const DoubleInt &rhs);
     friend bool operator==(const int &lhs, const DoubleInt &rhs);
     friend bool operator==(const DoubleInt &lhs, const int &rhs);
-
-    static const DoubleIntBaseType MAX = 429496795;
-    static const DoubleIntBaseType MIN = 0;
 
     unsigned int high32;
     unsigned int low32;
@@ -60,5 +57,6 @@ public:
 
 DoubleInt DoubleIntTestFibonacci(DoubleInt input);
 
+void DoubleIntTestSuite();
 
 #endif //BIGINT_DOUBLEINT_H
