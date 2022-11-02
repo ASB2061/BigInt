@@ -69,6 +69,12 @@ DoubleInt operator+(const DoubleInt &lhs, const DoubleInt &rhs) {
     return returnable;
 }
 
+DoubleInt &DoubleInt::operator+=(const DoubleInt &rhs) {
+    DoubleInt sum = *this + rhs;
+    *this = sum;
+    return *this;
+}
+
 
 DoubleInt operator-(const DoubleInt &lhs, const DoubleInt &rhs) {
     hccs_assert(lhs.high32 >= rhs.low32);

@@ -31,6 +31,8 @@ public:
     friend DoubleInt operator-(const DoubleInt &lhs, const int &rhs);
     friend DoubleInt operator-(const DoubleInt &lhs, const DoubleInt &rhs);
 
+    DoubleInt &operator+=(const DoubleInt &rhs)
+
     friend bool operator>(const DoubleInt &lhs, const DoubleInt &rhs);
     friend bool operator>(const int &lhs, const DoubleInt &rhs);
     friend bool operator>(const DoubleInt &lhs, const int &rhs);
