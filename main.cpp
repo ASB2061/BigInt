@@ -7,11 +7,14 @@
 #include "SafeInt.h"
 #include "String.h"
 #include "DoubleInt.h"
+#include <logic.h>
 
 int main() {
     std::cout << "Hello, world" << std::endl;
     // need to add calls to test suite and/or user interface to work with the code here
     String_Demo();
     SafeInt_Demo();
+    DoubleInt fiboCount = DoubleInt(15);
+    hccs_assert(DoubleIntTestFibonacci(fiboCount) == 610);
     std::cout << "all done" << std::endl;
 }

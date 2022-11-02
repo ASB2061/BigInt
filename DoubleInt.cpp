@@ -5,6 +5,7 @@
 #include "DoubleInt.h"
 #include "SafeInt.h"
 #include <exception>
+#include <logic.h>
 
 
 DoubleInt::DoubleInt() {
@@ -12,16 +13,18 @@ DoubleInt::DoubleInt() {
     high32 = 0;
 }
 
-DoubleInt::DoubleInt(int i) {
+DoubleInt::DoubleInt(const DoubleInt &i) {
+    low32 = i.low32;
+    high32 = i.high32;
+}
+
+DoubleInt::DoubleInt(unsigned int i) {
     // we want something to change so that a doubleInt is returned
-    // that represents int i
-    sign = 0;
-    if (i > 0) {
-        sign = 1;
-    } else if (i < 0) {
-        sign = -1;
-    }
-    low32 = abs(i);
+    // that represents int i.
+    hccs_assert(i >= 0); // i must be greater or equal to 0 since we are letting doubleint be unsigned.
+                         // technically, the assert statement is not needed since we require an unsigned integer to
+                         // intialize
+    low32 = i;
     high32 = 0;
 }
 
@@ -48,11 +51,7 @@ DoubleInt operator+(const DoubleInt &lhs, const int &rhs) {
 
 
 DoubleInt operator+(const DoubleInt &lhs, const DoubleInt &rhs) {
-    if (lhs.sign > 0 && rhs.sign > 0) {
 
-    }   else if (lhs.sign > 0 && rhs.sign < 0) {
-
-    } else if ()
 }
 
 
@@ -151,13 +150,23 @@ bool operator==(const DoubleInt &lhs, const DoubleInt &rhs) {
 
 }
 
-
-int DoubleIntTestFibo(int input) {
-    if (input == 0) { // basic recursive design that will need to be fixed.
-        return 0;
-    } else if (input == 1) {
-        return 1;
-    } else {
-        return DoubleIntTestFibo(input - 1) + DoubleIntTestFibo(input - 2);
-    }
+/*
+ * Note that this will need to be edited so that this sequence grows ***linearly!*** So the work does not increase so much
+ */
+DoubleInt DoubleIntTestFibonacci(DoubleInt input) {
+    unsigned int fOne = 0;
+    unsigned int fTwo = 1;
+    auto f_one = DoubleInt(input);
+    f_one = fOne;
+//    for (int i = 0; i < input.low32; i++) {
+//
+//    }
+//    if (input.low32 == 0) { // basic recursive design that will need to be fixed.
+//        return 0;
+//    } else if (input == 1) {
+//        return 1;
+//    } else {
+//        return DoubleIntTestFibonacci(input - 1) + DoubleIntTestFibonacci(input - 2);
+//    }
+    return DoubleInt(1);
 }
