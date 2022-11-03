@@ -224,8 +224,11 @@ void DoubleIntTestSuite() {
     hccs_assert((DoubleInt(1,1)+= DoubleInt(UINT32_MAX, 2)) == DoubleInt(0, 4));
     std::cout << "Testing comparison operators and zero testing\n" << std::endl;
     hccs_assert(DoubleInt(UINT32_MAX - 7, 1) > DoubleInt(32, 0));
-    hccs_assert(DoubleInt(UINT32_MAX - 7, 1) >= DoubleInt(32, 0));
+    hccs_assert(DoubleInt(UINT32_MAX - 7, 0) > DoubleInt(UINT32_MAX - 8, 0));
+    hccs_assert(DoubleInt(UINT32_MAX - 7, 1) >= DoubleInt(UINT32_MAX - 7, 1));
     hccs_assert(DoubleInt(32, 0) < DoubleInt(UINT32_MAX - 7, 1));
+    hccs_assert(DoubleInt(32, 1) < DoubleInt(33, 1));
+
     hccs_assert(isZero(DoubleInt(0, 0)));
 
 
