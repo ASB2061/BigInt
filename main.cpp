@@ -15,9 +15,9 @@ int main() {
     // String_Demo();
     // SafeInt_Demo();
 
-//    unsigned int pie;
-//    pie = UINT32_MAX + 17;
-//    std::cout << UINT32_MAX << "\n" << pie << std::endl;
+    unsigned int pie;
+    pie = 10000 - 10001;
+    std::cout << pie << std::endl;
 
     DoubleIntTestSuite();
     unsigned int inputFibo = 93; // note that 93 is the highest fibonacci value that can be calculated with DoubleInt

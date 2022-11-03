@@ -5,7 +5,7 @@
 /*
  * This is the DoubleInt Class header. DoubleInt is a class where we are doubling the max space for the data type int.
  * For now, we are assuming that DoubleInt is an unsigned integer. Thus, the maximum value DoubleInt can hold should be
- * 2^64 - 1.
+ * 2^64 - 1. We utilize two data fields, both unsigned integers. One represents the high 32 bits and the other the low 32 bits.
  */
 
 #include "SafeInt.h"
@@ -13,17 +13,15 @@
 #ifndef BIGINT_DOUBLEINT_H
 #define BIGINT_DOUBLEINT_H
 
-typedef int DoubleIntBaseType;
-
 class DoubleInt {
 public:
     // DoubleInt(SafeInt i);
+
+    // Constructors
     DoubleInt();
     DoubleInt(unsigned int i);
     DoubleInt(DoubleInt const &i);
     DoubleInt(unsigned int low, unsigned int high);
-
-
 
    // friend DoubleInt operator+(const DoubleInt &lhs, const int &rhs);
     friend DoubleInt operator+(const DoubleInt &lhs, const DoubleInt &rhs);
@@ -56,6 +54,8 @@ public:
     friend bool operator==(const DoubleInt &lhs, const int &rhs);
 
     friend bool isZero(const DoubleInt &lhs);
+
+    explicit operator int() const;
 
     unsigned int high32;
     unsigned int low32;
