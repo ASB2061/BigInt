@@ -52,6 +52,21 @@ DoubleInt::DoubleInt(unsigned int low, unsigned int high) {
 //
 //}
 
+DoubleInt operator+(const DoubleInt &lhs, const unsigned int &rhs) {
+    DoubleInt returnable = DoubleInt();
+    if (lhs.low32 > UINT32_MAX - rhs) {
+        returnable.low32 = lhs.low32 + rhs;
+        if (lhs.high32 < UINT32_MAX) {
+            returnable.high32 = lhs.high32 + 1;
+        } else {
+            throw;
+        }
+    }
+    returnable.low32 = lhs.low32 + rhs;
+    returnable.high32 = lhs.high32;
+    return returnable;
+}
+
 DoubleInt operator+(const DoubleInt &lhs, const DoubleInt &rhs) {
     hccs_assert(!(lhs.high32 > UINT32_MAX - rhs.high32));
     // Essentially, we are trying to make sure that adding these two DoubleInts will not go over the storage limit of
@@ -254,6 +269,8 @@ void DoubleIntTestSuite() {
     std::cout << "Testing subtraction...\n" << std::endl;
     hccs_assert(DoubleInt(UINT32_MAX, 0) == DoubleInt(0, 1) - DoubleInt(1,0));
     hccs_assert(DoubleInt(0, 0) == DoubleInt(1, 0) - DoubleInt(1,0));
+
+    std::cout << "Testing subtraction mutator...\n" << std::endl;
 
 
 
