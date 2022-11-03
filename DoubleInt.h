@@ -61,7 +61,7 @@ public:
     unsigned int low32;
 };
 
-DoubleInt DoubleIntTestFibonacci(DoubleInt input);
+void DoubleIntTestFibonacci(unsigned int input);
 
 std::ostream &operator<<(std::ostream &any_ostream, const DoubleInt &printMe); // output operation
 

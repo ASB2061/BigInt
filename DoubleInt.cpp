@@ -105,7 +105,15 @@ bool operator>(const DoubleInt &lhs, const DoubleInt &rhs) {
 }
 
 bool operator<(const DoubleInt &lhs, const DoubleInt &rhs) {
-
+    if (lhs.high32 < rhs.high32) {
+        return true;
+    } else if (lhs.high32 == rhs.high32) {
+        if (lhs.low32 < rhs.low32) {
+            return true;
+        }
+        return false;
+    }
+    return false;
 }
 
 bool operator>=(const DoubleInt &lhs, const int &rhs) {
@@ -161,11 +169,21 @@ bool isZero(const DoubleInt &lhs) {
  * Note that this will need to be edited so that this sequence grows ***linearly!*** So the work does not increase so
  * much for each step.
  */
-DoubleInt DoubleIntTestFibonacci(DoubleInt input) {
-    unsigned int fOne = 0;
-    unsigned int fTwo = 1;
-    auto f_one = DoubleInt(input);
-    f_one = fOne;
+void DoubleIntTestFibonacci(unsigned int input) {
+    auto fOne = DoubleInt(0);
+    auto fTwo = DoubleInt(1);
+    DoubleInt fArray[input];
+    for (int i = 0; i <= input; i++) {
+        if (i<=1) {
+            fArray[i] = fOne + fTwo;
+        } else {
+            fArray[i] = fOne + fTwo;
+            fOne = fTwo;
+            fTwo = fArray[i];
+        }
+    }
+    std::cout << "Result: " << fArray[input] << std::endl;
+
 //    for (int i = 0; i < input.low32; i++) {
 //
 //    }
@@ -176,16 +194,24 @@ DoubleInt DoubleIntTestFibonacci(DoubleInt input) {
 //    } else {
 //        return DoubleIntTestFibonacci(input - 1) + DoubleIntTestFibonacci(input - 2);
 //    }
-    return DoubleInt(1);
 }
 
 std::ostream &operator<<(std::ostream &any_ostream, const DoubleInt &printMe)             // output operation
 {
-    return any_ostream << ;  //
+    std::stringstream stream; // this method was partially helped with an answer from stackoverflow by user Kornel Kisielewicz
+    // viewed on November 2, 2022 link: https://stackoverflow.com/a/5100745 . Here the library <iomanip> is used along
+    // with std::stringstream and std::hex to convert the double int parts to hexadecimal. 0x is also added to the front
+    // of the hexadecimal representation and std::setfill and std::setw make sure that there are sixteen places in total
+    // to represent all of DoubleInt
+    return any_ostream << "0x" << std::setfill('0') << std::setw(8) << std::hex << printMe.high32 << std::setfill('0')
+    << std::setw(8) << std::hex << printMe.low32 << std::dec;  // note that std::dec is used b/c the library used to
+    // convert double int to hexadecimal is a bit finicky with everything else and started converting things outside
+    // the DoubleInt class into hexadecimal even though std::hex was not called, but perhaps because we forgot to revert
+    // to std::dec
 }
 
 void DoubleIntTestSuite() {
-    std::cout << "Testing addition..." << std::endl;
+    std::cout << "Testing addition...\n" << std::endl;
     DoubleInt testingVarOne = DoubleInt();
     testingVarOne.low32 = UINT32_MAX;
     DoubleInt testingVarTwo = DoubleInt();
@@ -194,13 +220,16 @@ void DoubleIntTestSuite() {
     DoubleInt testAnswer = testingVarOne + testingVarTwo;
     hccs_assert(correctAnswerOne == testAnswer);
     hccs_assert(DoubleInt(0, 1) == DoubleInt(UINT32_MAX, 0) + DoubleInt(1,0));
-    std::cout << "Testing addition mutator..." << std::endl;
+    std::cout << "Testing addition mutator...\n" << std::endl;
     hccs_assert((DoubleInt(1,1)+= DoubleInt(UINT32_MAX, 2)) == DoubleInt(0, 4));
-    std::cout << "Testing comparison operators and zero testing" << std::endl;
+    std::cout << "Testing comparison operators and zero testing\n" << std::endl;
     hccs_assert(DoubleInt(UINT32_MAX - 7, 1) > DoubleInt(32, 0));
     hccs_assert(DoubleInt(UINT32_MAX - 7, 1) >= DoubleInt(32, 0));
     hccs_assert(DoubleInt(32, 0) < DoubleInt(UINT32_MAX - 7, 1));
     hccs_assert(isZero(DoubleInt(0, 0)));
 
+
+    std::cout << "Testing output for DoubleInt. Decimal Value for this test is 47244640255\n" << std::endl;
+    std::cout << "Got: " << DoubleInt(4294967295, 10) << "\nExpected: 0x0000000affffffff" << std::endl;
     std::cout << "Testing complete!" << std::endl;
 }
