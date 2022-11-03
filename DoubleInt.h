@@ -25,10 +25,10 @@ public:
 
 
 
-    friend DoubleInt operator+(const DoubleInt &lhs, const int &rhs);
+   // friend DoubleInt operator+(const DoubleInt &lhs, const int &rhs);
     friend DoubleInt operator+(const DoubleInt &lhs, const DoubleInt &rhs);
 
-    friend DoubleInt operator-(const DoubleInt &lhs, const int &rhs);
+   // friend DoubleInt operator-(const DoubleInt &lhs, const int &rhs);
     friend DoubleInt operator-(const DoubleInt &lhs, const DoubleInt &rhs);
 
     DoubleInt &operator+=(const DoubleInt &rhs);
@@ -36,6 +36,8 @@ public:
     friend bool operator>(const DoubleInt &lhs, const DoubleInt &rhs);
     friend bool operator>(const int &lhs, const DoubleInt &rhs);
     friend bool operator>(const DoubleInt &lhs, const int &rhs);
+
+    friend bool operator<(const DoubleInt &lhs, const DoubleInt &rhs);
 
     friend bool operator>=(const DoubleInt &lhs, const DoubleInt &rhs);
     friend bool operator>=(const int &lhs, const DoubleInt &rhs);
@@ -53,11 +55,15 @@ public:
     friend bool operator==(const int &lhs, const DoubleInt &rhs);
     friend bool operator==(const DoubleInt &lhs, const int &rhs);
 
+    friend bool isZero(const DoubleInt &lhs);
+
     unsigned int high32;
     unsigned int low32;
 };
 
 DoubleInt DoubleIntTestFibonacci(DoubleInt input);
+
+std::ostream &operator<<(std::ostream &any_ostream, const DoubleInt &printMe); // output operation
 
 void DoubleIntTestSuite();
 

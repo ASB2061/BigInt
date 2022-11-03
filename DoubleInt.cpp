@@ -6,7 +6,7 @@
 #include "SafeInt.h"
 #include <exception>
 #include <logic.h>
-
+#include <iomanip>
 
 DoubleInt::DoubleInt() {
     this->low32 = 0;
@@ -51,7 +51,7 @@ DoubleInt operator+(const DoubleInt &lhs, const DoubleInt &rhs) {
     DoubleInt returnable = DoubleInt();
     if (lhs.high32 == UINT32_MAX - rhs.high32) {
         hccs_assert(lhs.low32 <= UINT32_MAX - rhs.low32);
-        // If the high bits add up to the maximum, the low bits have to not add to their maximum or there will be overflow.
+        // If the high bits add up to the maximum, the low bits have to not go past the maximum or there will be overflow.
         returnable.low32 = lhs.low32 + rhs.low32;
         returnable.high32 = lhs.high32 + rhs.high32;
         return returnable;
@@ -76,7 +76,7 @@ DoubleInt &DoubleInt::operator+=(const DoubleInt &rhs) {
 }
 
 
-DoubleInt operator-(const DoubleInt &lhs, const DoubleInt &rhs) {
+DoubleInt operator-(const DoubleInt &lhs, const DoubleInt &rhs) { // this needs to be edited
     hccs_assert(lhs.high32 >= rhs.low32);
 
     return DoubleInt();
@@ -104,6 +104,10 @@ bool operator>(const DoubleInt &lhs, const DoubleInt &rhs) {
     return false;
 }
 
+bool operator<(const DoubleInt &lhs, const DoubleInt &rhs) {
+
+}
+
 bool operator>=(const DoubleInt &lhs, const int &rhs) {
     if (lhs.low32 >= rhs || lhs.high32 > 0) {
         return true;
@@ -119,15 +123,14 @@ bool operator>=(const int &lhs, const DoubleInt &rhs) {
 }
 
 bool operator>=(const DoubleInt &lhs, const DoubleInt &rhs) {
-    if (lhs.high32 > rhs.high32 || (lhs.high32 == rhs.high32 && lhs.low32 > rhs.low32) || (lhs.high32 == rhs.high32 && lhs.low32 == rhs.low32)) {
+    if ((lhs.high32 > rhs.high32) || (lhs.high32 == rhs.high32 && lhs.low32 >= rhs.low32)) {
         return true;
     }
     return false;
 }
 
-
 bool operator==(const DoubleInt &lhs, const int &rhs) {
-    if (lhs.high32 <= 0 && lhs.low32 == rhs) {
+    if (lhs.high32 == 0 && lhs.low32 == rhs) {
         return true;
     }
     return false;
@@ -141,13 +144,22 @@ bool operator==(const int &lhs, const DoubleInt &rhs) {
 }
 
 bool operator==(const DoubleInt &lhs, const DoubleInt &rhs) {
-    if (lhs.high32 == rhs.high32 && lhs.low32 == rhs.low32)
+    if (lhs.high32 == rhs.high32 && lhs.low32 == rhs.low32) {
         return true;
+    }
+    return false;
+}
+
+bool isZero(const DoubleInt &lhs) {
+    if (lhs == DoubleInt(0, 0)) {
+        return true;
+    }
     return false;
 }
 
 /*
- * Note that this will need to be edited so that this sequence grows ***linearly!*** So the work does not increase so much
+ * Note that this will need to be edited so that this sequence grows ***linearly!*** So the work does not increase so
+ * much for each step.
  */
 DoubleInt DoubleIntTestFibonacci(DoubleInt input) {
     unsigned int fOne = 0;
@@ -167,6 +179,11 @@ DoubleInt DoubleIntTestFibonacci(DoubleInt input) {
     return DoubleInt(1);
 }
 
+std::ostream &operator<<(std::ostream &any_ostream, const DoubleInt &printMe)             // output operation
+{
+    return any_ostream << ;  //
+}
+
 void DoubleIntTestSuite() {
     std::cout << "Testing addition..." << std::endl;
     DoubleInt testingVarOne = DoubleInt();
@@ -176,7 +193,14 @@ void DoubleIntTestSuite() {
     DoubleInt correctAnswerOne = DoubleInt(0, 1);
     DoubleInt testAnswer = testingVarOne + testingVarTwo;
     hccs_assert(correctAnswerOne == testAnswer);
-    hccs_assert(DoubleInt(32, 32) == DoubleInt(UINT32_MAX, 15) + DoubleInt(33,16));
+    hccs_assert(DoubleInt(0, 1) == DoubleInt(UINT32_MAX, 0) + DoubleInt(1,0));
+    std::cout << "Testing addition mutator..." << std::endl;
+    hccs_assert((DoubleInt(1,1)+= DoubleInt(UINT32_MAX, 2)) == DoubleInt(0, 4));
+    std::cout << "Testing comparison operators and zero testing" << std::endl;
+    hccs_assert(DoubleInt(UINT32_MAX - 7, 1) > DoubleInt(32, 0));
+    hccs_assert(DoubleInt(UINT32_MAX - 7, 1) >= DoubleInt(32, 0));
+    hccs_assert(DoubleInt(32, 0) < DoubleInt(UINT32_MAX - 7, 1));
+    hccs_assert(isZero(DoubleInt(0, 0)));
 
     std::cout << "Testing complete!" << std::endl;
 }
