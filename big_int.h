@@ -13,18 +13,26 @@
 extern "C" {
 #endif
 
-struct big_int {
+#include <stdlib.h>
+
+typedef unsigned int big_int_base_type;
+
+typedef struct {
+    big_int_base_type size;
     unsigned int *int_group_pointer;
-    int size;
+} big_int;
 
-};
+big_int make_big_int();
 
-struct big_int make_big_int();
+big_int make_big_int_from_int(unsigned int i);
 
-void print_big_int();
+#include <stdio.h>
+
+unsigned int print_big_int_to(FILE *destination, big_int i);
+
+unsigned int print_big_int(big_int i);
 
 void big_int_Fibo(unsigned int input);
-
 
 #if defined __cplusplus // read this "extern C" only in C++
 }
