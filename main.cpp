@@ -29,5 +29,15 @@ int main() {
 //    hccs_assert(DoubleIntTestFibonacci(fiboCount) == 610);
     big_int test_big_int = make_big_int_from_int(100000);
     print_big_int(test_big_int);
+    unsigned int *Xtest = (unsigned int*) malloc(10 * sizeof(unsigned int));
+    for (int z = 0; z < 10; z++) {
+        Xtest[z] = 50 + z;
+    }
+    for (int y = 0; y < 10; y++) {
+        fprintf(stdout, "%i", Xtest[y]);
+    }
+    fprintf(stdout, "%s", "\n");
+    test_big_int = big_int_extend( Xtest, 10,test_big_int.int_group_pointer, test_big_int.size);
+    print_big_int_to(stdout, test_big_int);
     std::cout << "all done" << std::endl;
 }
