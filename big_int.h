@@ -26,6 +26,8 @@ big_int make_big_int();
 
 big_int make_big_int_from_int(unsigned int i);
 
+big_int big_int_extend(unsigned int *first, unsigned int first_size, unsigned int *second, unsigned int second_size);
+
 #include <stdio.h>
 
 unsigned int print_big_int_to(FILE *destination, big_int i);
