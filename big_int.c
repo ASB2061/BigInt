@@ -72,7 +72,9 @@ big_int big_int_add(big_int i, big_int j) {
             }
         }
         if (regulator == 1) {
-            returned_big_int = big_int_extend(returned_big_int.int_group_pointer,returned_big_int.size, , 1);
+            unsigned int *onePointer = (unsigned int *) malloc(1 * sizeof(unsigned int));
+            *onePointer = 1;
+            returned_big_int = big_int_extend(returned_big_int.int_group_pointer,returned_big_int.size, onePointer, 1);
         }
 
 

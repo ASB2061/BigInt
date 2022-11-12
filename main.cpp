@@ -39,5 +39,12 @@ int main() {
     fprintf(stdout, "%s", "\n");
     test_big_int = big_int_extend( Xtest, 10,test_big_int.int_group_pointer, test_big_int.size);
     print_big_int_to(stdout, test_big_int);
+    big_int big_int_TestAdd = make_big_int_empty_large(2);
+    for (int c = 0; c < 6; c++) {
+        big_int_TestAdd.int_group_pointer[c] = 4294967295;
+    }
+    big_int one_big_int = make_big_int_from_int(1);
+    big_int bigIntAddition = big_int_add(big_int_TestAdd, one_big_int);
+    print_big_int_to(stdout, bigIntAddition);
     std::cout << "all done" << std::endl;
 }
