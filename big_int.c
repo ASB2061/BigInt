@@ -63,18 +63,41 @@ big_int big_int_add(big_int i, big_int j) {
                 returned_big_int.int_group_pointer[z] = i.int_group_pointer[z] + j.int_group_pointer[z] + 1;
             }
         }
-        if (regulator == 1) { // if the regulator is still 1 at the last place, then we have a special case
-            regulator = check_overflow(i.int_group_pointer[j.size], 1); // here we check if there is overflow if we add into i's next place
-            if (regulator == 0) { // if there will be no overflow from the one
-                returned_big_int.int_group_pointer[j.size] = i.int_group_pointer[j.size] + 1;
-                for (int a = 1; a < (i.size - j.size); a++) {
-                    returned_big_int.int_group_pointer[j.size + 1] = i.int_group_pointer[j.size + 1];
-                }
-                return returned_big_int;
+        for (int x = 0; x < (i.size < j.size); x++) {
+            if (regulator == 0) {
+                returned_big_int.int_group_pointer[x] = i.int_group_pointer[x];
             } else if (regulator == 1) {
-
+                regulator = check_overflow(i.int_group_pointer[x],  1);
+                returned_big_int.int_group_pointer[x] = i.int_group_pointer[x] + 1;
             }
         }
+        if (regulator == 1) {
+            returned_big_int = big_int_extend(returned_big_int.int_group_pointer,returned_big_int.size, , 1);
+        }
+
+
+//        if (regulator == 1) { // if the regulator is still 1 at the last place, then we have a special case
+//            regulator = check_overflow(i.int_group_pointer[j.size], 1); // here we check if there is overflow if we add into i's next place
+//            if (regulator == 0) { // if there will be no overflow from the one
+//                returned_big_int.int_group_pointer[j.size] = i.int_group_pointer[j.size] + 1;
+//                for (int a = 1; a < (i.size - j.size); a++) {
+//                    returned_big_int.int_group_pointer[j.size + a] = i.int_group_pointer[j.size + a];
+//                }
+//                return returned_big_int;
+//            } else if (regulator == 1) { // if there is overflow from the one.
+//                    for (int b = 0; b < (i.size - j.size); b++) {
+//                        returned_big_int.int_group_pointer[j.size + b] = i.int_group_pointer[j.size + b] + 1;
+//                    }
+////                if (i.size - j.size == 1) {
+////
+////                } else if (i.size - j.size > 1) {
+////                    returned_big_int.int_group_pointer[j.size] = i.int_group_pointer[j.size] + 1;
+////                    for (int a = 1; a < (i.size - j.size); a++) {
+////                        returned_big_int.int_group_pointer[j.size + a] = i.int_group_pointer[j.size + a];
+////                    }
+//                }
+//            }
+//        }
 
     } else if (i.size < j.size) {
 
