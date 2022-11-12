@@ -16,6 +16,8 @@ extern "C" {
 #include <stdlib.h>
 
 typedef unsigned int big_int_base_type;
+#define BIG_INT_MAX 4294967295
+#define BIG_INT_MIN 0
 
 typedef struct {
     big_int_base_type size;
@@ -26,15 +28,23 @@ big_int make_big_int();
 
 big_int make_big_int_from_int(unsigned int i);
 
+big_int make_big_int_empty_large(unsigned int i);
+
 big_int big_int_extend(unsigned int *first, unsigned int first_size, unsigned int *second, unsigned int second_size);
+
+big_int big_int_add(big_int i, big_int j);
 
 #include <stdio.h>
 
-unsigned int print_big_int_to(FILE *destination, big_int i);
+short check_overflow(unsigned int x, unsigned int y);
 
-unsigned int print_big_int(big_int i);
+void print_big_int_to(FILE *destination, big_int i);
+
+void print_big_int(big_int i);
 
 void big_int_Fibo(unsigned int input);
+
+void big_int_test_suite();
 
 #if defined __cplusplus // read this "extern C" only in C++
 }
