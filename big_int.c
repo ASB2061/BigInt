@@ -72,10 +72,12 @@ big_int big_int_add(big_int i, big_int j) {
             }
         }
         if (regulator == 1) {
-            unsigned int *onePointer = (unsigned int *) malloc(1 * sizeof(unsigned int));
-            *onePointer = 1;
-            returned_big_int = big_int_extend(returned_big_int.int_group_pointer,returned_big_int.size, onePointer, 1);
+            big_int big_int_one = make_big_int_from_int(1);
+            returned_big_int = big_int_extend(returned_big_int.int_group_pointer,returned_big_int.size,
+                                              big_int_one.int_group_pointer, big_int_one.size);
+            free(big_int_one.int_group_pointer);
         }
+        return returned_big_int;
 
 
 //        if (regulator == 1) { // if the regulator is still 1 at the last place, then we have a special case
