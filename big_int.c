@@ -272,9 +272,9 @@ void big_int_Fibo(unsigned int input) {
             free(fNminusOne.int_group_pointer); // we free the two initial ones, since they are no longer needed in the
             // free-store heap. it would be more efficient to get rid of them earlier. prior to i becoming 2 depending on how larg
             free(fNminusTwo.int_group_pointer);
+            fN[i] = big_int_add(fN[i-1], fN[i-2]);
             free(fN[0].int_group_pointer);
             freeTracker+=3;
-            fN[i] = big_int_add(fN[i-1], fN[i-2]);
         } else {
             fN[i] = big_int_add(fN[i-1], fN[i-2]);
 
