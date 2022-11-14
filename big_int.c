@@ -5,7 +5,7 @@
 #include <bits/types/FILE.h>
 #include "big_int.h"
 #include <stdlib.h>
-#include <logic.h>
+#include <assert.h>
 
 /**
  * This is the .c file for the big_int class/struct. In order to construct big_int, we utilize malloc
@@ -63,56 +63,94 @@ big_int big_int_extend(unsigned int *first, unsigned int first_size, unsigned in
     return big_int_extension;
 }
 
+/**
+ * This function adds big_ints together.
+ * @param i
+ * @param j
+ * @return
+ */
 big_int big_int_add(big_int i, big_int j) {
-    char regulator = 0;
-    if (i.size > j.size) {
-        big_int returned_big_int = make_big_int_empty_large(i.size);
-        for (int z = 0; z < j.size; z++) {
-            if (regulator == 0) {
+    char regulator = 0; // this represents our carry. Since its value will only be 0 or 1, we set it as char since that
+    // is the smallest data type in C
+    if (i.size > j.size) { // if the first big int is larger than the second.
+        big_int returned_big_int = make_big_int_empty_large(i.size); // we make the returned big_int the size of the
+        // larger big_int
+        for (int z = 0; z < j.size; z++) { // we iterate through the size of the smaller big_int
+            if (regulator == 0) { // if carry is 0
                 regulator = check_overflow(i.int_group_pointer[z], j.int_group_pointer[z]);
+                // check for overflow
                 returned_big_int.int_group_pointer[z] = i.int_group_pointer[z] + j.int_group_pointer[z];
-            } else if (regulator == 1) {
-
-                regulator = check_overflow(i.int_group_pointer[z], j.int_group_pointer[z] + 1);
-                returned_big_int.int_group_pointer[z] = i.int_group_pointer[z] + j.int_group_pointer[z] + 1;
+                // add the unsigned ints and place in the returned_big_int array in the fsh
+            } else if (regulator == 1) { // if the carry is one.
+                if ((check_overflow(i.int_group_pointer[z], 1) == 1 ||
+                     check_overflow(j.int_group_pointer[z], 1) == 1)) {
+                    /*
+                     * If there is a situation where adding a carry causes overflow, we account for that and set the
+                     * carry for the next
+                     */
+                    returned_big_int.int_group_pointer[z] = i.int_group_pointer[z] + j.int_group_pointer[z] + 1;
+                    regulator = 1;
+                } else {
+                    // Otherwise, we add the carry as normal.
+                    regulator = check_overflow(i.int_group_pointer[z], j.int_group_pointer[z] + 1);
+                    returned_big_int.int_group_pointer[z] = i.int_group_pointer[z] + j.int_group_pointer[z] + 1;
+                }
             }
         }
-        for (int x = 0; x < (i.size - j.size); x++) {
+        for (int x = 0; x < (i.size - j.size); x++) { // Next, we loop through the rest of the larger big_int and
+            // copy those values into returned_big_int
             if (regulator == 0) {
                 returned_big_int.int_group_pointer[x + j.size] = i.int_group_pointer[x + j.size];
             } else if (regulator == 1) {
+                // if there was overflow from some calculation prior to cycling through all the smaller big_int, we are
+                // covered
                 regulator = check_overflow(i.int_group_pointer[x + j.size], 1);
                 returned_big_int.int_group_pointer[x + j.size] = i.int_group_pointer[x + j.size] + 1;
             }
         }
         if (regulator == 1) {
+            // if there is still a carry left, we extend the returned big int and add a one in that place.
             big_int big_int_one = make_big_int_from_int(1);
             returned_big_int = big_int_extend(returned_big_int.int_group_pointer, returned_big_int.size,
                                               big_int_one.int_group_pointer, big_int_one.size);
-            //free(big_int_one.int_group_pointer);
         }
         return returned_big_int;
 
-    } else if (i.size < j.size) {
-        big_int returned_big_int = make_big_int_empty_large(j.size);
-        for (int a = 0; a < i.size; a++) {
-            if (regulator == 0) {
-                regulator = check_overflow(i.int_group_pointer[a], j.int_group_pointer[a]);
+    } else if (i.size < j.size) { // if the second big_int is larger than the first
+        big_int returned_big_int = make_big_int_empty_large(j.size); // we create a big_int of the size of the second
+        // term.
+        for (int a = 0; a < i.size; a++) { // we iterate through the first big_int since it is the smaller one.
+            if (regulator == 0) { // if the carry is 0
+                regulator = check_overflow(i.int_group_pointer[a], j.int_group_pointer[a]); // check if we will need
+                // a carry
                 returned_big_int.int_group_pointer[a] = i.int_group_pointer[a] + j.int_group_pointer[a];
             } else if (regulator == 1) {
-                regulator = check_overflow(i.int_group_pointer[a], j.int_group_pointer[a] + 1);
-                returned_big_int.int_group_pointer[a] = i.int_group_pointer[a] + j.int_group_pointer[a] + 1;
+                if ((check_overflow(1, i.int_group_pointer[a]) == 1 ||
+                     check_overflow(1, j.int_group_pointer[a]) == 1)) { // this checks if a carry will cause us to
+                    // need another carry
+                    returned_big_int.int_group_pointer[a] = i.int_group_pointer[a] + j.int_group_pointer[a] + 1;
+                    regulator = 1;
+                } else {
+                    // if the carry does not affect anything, then we add the carry normally and check for whether a carry will
+                    // be needed for the next step.
+                    regulator = check_overflow(i.int_group_pointer[a], j.int_group_pointer[a]);
+                    returned_big_int.int_group_pointer[a] = i.int_group_pointer[a] + j.int_group_pointer[a];
+                }
             }
         }
-        for (int b = 0; b < (j.size - i.size); b++) {
+        for (int b = 0; b < (j.size - i.size); b++) { // go through the rest of the terms in the second (larger) big_int
             if (regulator == 0) {
+                // if the carry is zero, no need to continually check for overflow since we are just setting the higher
+                // places in returned_big_int's array to j's values.
                 returned_big_int.int_group_pointer[b + i.size] = j.int_group_pointer[b + i.size];
             } else if (regulator == 1) {
+                // if there is a carry, then we make sure to add it in.
                 regulator = check_overflow(j.int_group_pointer[b + i.size], 1);
                 returned_big_int.int_group_pointer[b + i.size] = j.int_group_pointer[b + i.size] + 1;
             }
         }
         if (regulator == 1) {
+            // if there is still a carry, we extend the returned_big_int and add one to the highest place.
             big_int big_int_one = make_big_int_from_int(1);
             returned_big_int = big_int_extend(returned_big_int.int_group_pointer, returned_big_int.size,
                                               big_int_one.int_group_pointer, big_int_one.size);
@@ -129,19 +167,21 @@ big_int big_int_add(big_int i, big_int j) {
                 returned_big_int.int_group_pointer[c] = i.int_group_pointer[c] + j.int_group_pointer[c];
             } else if (regulator == 1) {
                 if ((check_overflow(1, i.int_group_pointer[c]) == 1 ||
-                     check_overflow(1, j.int_group_pointer[c] == 1)) &&
-                    check_overflow(i.int_group_pointer[c], j.int_group_pointer[c])) { // this checks for a
+                     check_overflow(1, j.int_group_pointer[c] == 1))) { // this checks for a
                     // possible edge case where the carry can cause overflow on one of the terms when checking for
                     // overflow, and we forget to add a carry to the next spot in the allocated block.
                     returned_big_int.int_group_pointer[c] = i.int_group_pointer[c] + j.int_group_pointer[c] + 1;
                     regulator = 1;
-                } else {
-                    regulator = check_overflow(i.int_group_pointer[c], j.int_group_pointer[c]);
+                } else { // if this is a normal case of overflow, we proceed as normal
+                    regulator = check_overflow(i.int_group_pointer[c], j.int_group_pointer[c]); // set up the carry
+                    // for the next place
                     returned_big_int.int_group_pointer[c] = i.int_group_pointer[c] + j.int_group_pointer[c] + 1;
+                    // include a one since there was a carry
                 }
             }
         }
-        if (regulator == 1) { // if there is still a carry after going through both big_ints, we extend the returned big_int
+        if (regulator == 1) {
+            // if there is still a carry after going through both big_ints, we extend the returned big_int
             // and add one to the new place
             big_int big_int_one = make_big_int_from_int(1);
             returned_big_int = big_int_extend(returned_big_int.int_group_pointer, returned_big_int.size,
@@ -189,6 +229,7 @@ void print_big_int_to(FILE *destination, big_int i) {
 void print_big_int(big_int i) {
     return print_big_int_to(stdout, i);
 }
+
 /**
  * Compares big_ints and returns 1 if the first parameter is greater than the second, 0 if the two are equal and -1 if
  * the second term is larger than the first.
@@ -206,9 +247,10 @@ char big_int_comparator(big_int i, big_int j) {
             } else if (i.int_group_pointer[i.size - d] < j.int_group_pointer[i.size - d]) {
                 return -1;
             } else {
-                return 0;
+                continue;
             }
         }
+        return 0;
     }
 }
 
@@ -219,7 +261,7 @@ void big_int_Fibo(unsigned int input) {
 void big_int_test_suite() {
     fprintf(stdout, "%s", "Testing Addition... \n");
 
-    // hccs_assert(big_int_comparator());
+    assert(5 == 5);
 }
 
 //        if (regulator == 1) { // if the regulator is still 1 at the last place, then we have a special case
