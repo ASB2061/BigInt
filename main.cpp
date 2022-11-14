@@ -30,6 +30,7 @@ int main() {
 /**
  * Testing out big_int_extend here
  */
+ /*
     big_int test_big_int = make_big_int_from_int(100000);
     print_big_int(test_big_int);
     unsigned int *Xtest = (unsigned int*) malloc(10 * sizeof(unsigned int));
@@ -42,19 +43,25 @@ int main() {
     fprintf(stdout, "%s", "\n");
     test_big_int = big_int_extend( Xtest, 10,test_big_int.int_group_pointer, test_big_int.size);
     print_big_int_to(stdout, test_big_int);
+*/
 
     /**
      * Testing with big_int_add here
      */
 
-    big_int big_int_TestAdd = make_big_int_empty_large(2);
+    big_int big_int_TestAdd = make_big_int_empty_large(6);
     for (int c = 0; c < 6; c++) {
-        big_int_TestAdd.int_group_pointer[c] = 55;
+        big_int_TestAdd.int_group_pointer[c] = 4294967295;
     }
     big_int one_big_int = make_big_int_from_int(1);
+    std::cout << "Adding... " << std::endl;
+    std::cout << "        ";
     print_big_int_to(stdout, big_int_TestAdd);
+    std::cout << "and" << std::endl;
+    std::cout << "        ";
     print_big_int_to(stdout, one_big_int);
-//    big_int bigIntAddition = big_int_add(big_int_TestAdd, one_big_int);
-//    print_big_int_to(stdout, bigIntAddition);
+    std::cout << "Result: ";
+    big_int bigIntAddition = big_int_add(big_int_TestAdd, one_big_int);
+    print_big_int_to(stdout, bigIntAddition);
     std::cout << "all done" << std::endl;
 }

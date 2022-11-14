@@ -63,23 +63,21 @@ big_int big_int_add(big_int i, big_int j) {
                 returned_big_int.int_group_pointer[z] = i.int_group_pointer[z] + j.int_group_pointer[z] + 1;
             }
         }
-        for (int x = 0; x < (i.size < j.size); x++) {
+        for (int x = 0; x < (i.size - j.size); x++) {
             if (regulator == 0) {
-                returned_big_int.int_group_pointer[x] = i.int_group_pointer[x];
+                returned_big_int.int_group_pointer[x + j.size] = i.int_group_pointer[x + j.size];
             } else if (regulator == 1) {
-                regulator = check_overflow(i.int_group_pointer[x],  1);
-                returned_big_int.int_group_pointer[x] = i.int_group_pointer[x] + 1;
+                regulator = check_overflow(i.int_group_pointer[x + j.size],  1);
+                returned_big_int.int_group_pointer[x + j.size] = i.int_group_pointer[x + j.size] + 1;
             }
         }
         if (regulator == 1) {
             big_int big_int_one = make_big_int_from_int(1);
             returned_big_int = big_int_extend(returned_big_int.int_group_pointer,returned_big_int.size,
                                               big_int_one.int_group_pointer, big_int_one.size);
-            free(big_int_one.int_group_pointer);
+            //free(big_int_one.int_group_pointer);
         }
         return returned_big_int;
-
-
 //        if (regulator == 1) { // if the regulator is still 1 at the last place, then we have a special case
 //            regulator = check_overflow(i.int_group_pointer[j.size], 1); // here we check if there is overflow if we add into i's next place
 //            if (regulator == 0) { // if there will be no overflow from the one
@@ -102,9 +100,17 @@ big_int big_int_add(big_int i, big_int j) {
 //                }
 //            }
 //        }
-
     } else if (i.size < j.size) {
+        big_int returned_big_int = make_big_int_empty_large(j.size);
+        for (int a = 0; a < i.size; a++) {
+            if (regulator == 0) {
+                regulator = check_overflow(i.int_group_pointer[a], j.int_group_pointer[a]);
+                returned_big_int.int_group_pointer[a] = i.int_group_pointer[a] + j.int_group_pointer[a];
+            } else if (regulator == 1) {
+                regulator = check_overflow(i.int_group_pointer[a], j.int_group_pointer[a] + 1);
 
+            }
+        }
     } else {
 
     }
@@ -119,7 +125,9 @@ short check_overflow(unsigned int x, unsigned int y){
 
 void print_big_int_to(FILE *destination, big_int i) {
     for (int j = 0; j < i.size; j++) {
-        fprintf(destination, "%i", i.int_group_pointer[j]);
+        fprintf(destination, "%u", i.int_group_pointer[j]); // here for fprintf, we use format %u to work
+        // with unsigned integers.
+
     }
     fprintf(destination, "%s", "\n");
 }
