@@ -23,7 +23,8 @@ int main() {
     // DoubleIntTestSuite();
     // unsigned int inputFibo = 93; // note that 93 is the highest fibonacci value that can be calculated with DoubleInt
     // std::cout << "Testing Fibonacci DoubleInt test function with input " << inputFibo << std::endl;
-
+    auto doubleIntTest = DoubleInt(64);
+    std::cout << doubleIntTest << "\n" << std::endl;
     // DoubleIntTestFibonacci(inputFibo);
 //    DoubleInt fiboCount = DoubleInt(15);
 //    hccs_assert(DoubleIntTestFibonacci(fiboCount) == 610);
@@ -64,7 +65,7 @@ int main() {
     big_int bigIntAddition = big_int_add(big_int_TestAdd, one_big_int);
     print_big_int_to(stdout, bigIntAddition);
 
-    big_int big_int_TestAddTwo = make_big_int_empty_large(3);
+    big_int big_int_TestAddTwo = make_big_int_empty_large(2);
     for (int c = 0; c < 6; c++) {
         big_int_TestAddTwo.int_group_pointer[c] = 4294967295;
     }

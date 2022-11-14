@@ -4,6 +4,7 @@
 
 #include <bits/types/FILE.h>
 #include "big_int.h"
+#include <stdlib.h>
 
 /**
  * This is the .c file for the big_int class/struct. In order to construct big_int, we utilize malloc
@@ -115,19 +116,26 @@ big_int big_int_add(big_int i, big_int j) {
                                               big_int_one.int_group_pointer, big_int_one.size);
         }
         return returned_big_int;
-    } else {
-        big_int returned_big_int = make_big_int_empty_large(i.size);
+    } else { /**
+             * If the length of the big_ints are equivalent. We follow this set of for loops.
+             */
+        big_int returned_big_int = make_big_int_empty_large(i.size); // create a returnable for loop that is empty with
+        // i.size spaces allocated in the free-store heap
         for (int c = 0; c < i.size; c++) {
-            if (regulator == 0) {
-                regulator = check_overflow(i.int_group_pointer[c], j.int_group_pointer[c]);
+            if (regulator == 0) { // if there is no carry from the previous addition.
+                regulator = check_overflow(i.int_group_pointer[c], j.int_group_pointer[c]); // check for overflow
                 returned_big_int.int_group_pointer[c] = i.int_group_pointer[c] + j.int_group_pointer[c];
             } else if (regulator == 1) {
-                if ((check_overflow(1, i.int_group_pointer[c]) == 1 || check_overflow(1, j.int_group_pointer[c] == 1)) &&
-                        check_overflow(i.int_group_pointer[c], j.int_group_pointer[c])) {
-
+                if ((check_overflow(1, i.int_group_pointer[c]) == 1 ||
+                     check_overflow(1, j.int_group_pointer[c] == 1)) &&
+                    check_overflow(i.int_group_pointer[c], j.int_group_pointer[c])) { // this checks for a
+                    // possible edge case where the carry can cause overflow on one of the terms when checking for
+                    // overflow, and we forget to add a carry to the next spot in the allocated block.
+                    returned_big_int.int_group_pointer[c] = i.int_group_pointer[c] + j.int_group_pointer[c] + 1;
+                    regulator = 1;
                 }
-                regulator = check_overflow(i.int_group_pointer[c], j.int_group_pointer[c] + 1);
-                returned_big_int.int_group_pointer[c] = i.int_group_pointer[c] + j.int_group_pointer[c] + 1;
+//                regulator = check_overflow(i.int_group_pointer[c], j.int_group_pointer[c] + 1);
+//                returned_big_int.int_group_pointer[c] = i.int_group_pointer[c] + j.int_group_pointer[c] + 1;
             }
         }
         if (regulator == 1) {
@@ -147,12 +155,21 @@ short check_overflow(unsigned int x, unsigned int y) {
 }
 
 void print_big_int_to(FILE *destination, big_int i) {
-    for (int j = 0; j < i.size; j++) {
-        fprintf(destination, "%u", i.int_group_pointer[j]); // here for fprintf, we use format %u to work
-        fprintf(destination, "%s", ", ");
-        // with unsigned integers.
-
+//    char* outputForPrint;
+//    outputForPrint = malloc(sizeof(char) * 8 * i.size);
+//    for (int j = 0; j < i.size; j++) {
+//        i.int_group_pointer[j];
+//        //outputForPrint[j] = i.int_group_pointer[j];
+//        // with unsigned integers.
+//        // fprintf(outputForPrint[j], "%08x", i.int_group_pointer[j]); // here for fprintf, we use format %u to work
+//        // fprintf(destination, "%s", ", ");
+//    }
+    for (int k = 0; k < i.size; k++) {
+        fprintf(destination, "%08x", i.int_group_pointer[i.size - k]);
     }
+
+//    fprintf(destination, "%08x", i.int_group_pointer[j]); // here for fprintf, we use format %u to work
+//    fprintf(destination, "%s", ", ");
     fprintf(destination, "%s", "\n");
 }
 
