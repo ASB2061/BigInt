@@ -11,12 +11,23 @@
  * larger than unsigned int (2^32 -1).
  */
 
+
+/**
+ * This makes an empty big_int struct with a size of 0 and a u_int pinter that is 0, since it points to nothing.
+ * @return big_int
+ */
 big_int make_big_int() {
     big_int newBigInt; // create an empty big_int struct
     newBigInt.size = 0; // set size to zero
     newBigInt.int_group_pointer = 0; // set the pointer to zero since we want it to be empty
     return newBigInt;
 }
+
+/**
+ * As the name suggests,
+ * @param i
+ * @return
+ */
 
 big_int make_big_int_from_int(unsigned int i) {
     big_int newBigInt; // create an empty big_int struct
@@ -29,7 +40,7 @@ big_int make_big_int_from_int(unsigned int i) {
 
 big_int make_big_int_empty_large(unsigned int i) {
     big_int newBigInt; // creates an empty big_int struct
-    newBigInt.int_group_pointer = (unsigned int * ) malloc(i * sizeof(unsigned int)); // allocates "i" spots of
+    newBigInt.int_group_pointer = (unsigned int *) malloc(i * sizeof(unsigned int)); // allocates "i" spots of
     // memory on the free-store heap.
     newBigInt.size = i; // makes newBigInt of size i since we want "i" empty spots
     return newBigInt;
@@ -37,7 +48,7 @@ big_int make_big_int_empty_large(unsigned int i) {
 
 big_int big_int_extend(unsigned int *first, unsigned int first_size, unsigned int *second, unsigned int second_size) {
     big_int big_int_extension;
-    big_int_extension.int_group_pointer = (unsigned int *) malloc((first_size + second_size)*sizeof(unsigned int));
+    big_int_extension.int_group_pointer = (unsigned int *) malloc((first_size + second_size) * sizeof(unsigned int));
     for (int i = 0; i < first_size; i++) {
         big_int_extension.int_group_pointer[i] = first[i];
     }
@@ -67,17 +78,97 @@ big_int big_int_add(big_int i, big_int j) {
             if (regulator == 0) {
                 returned_big_int.int_group_pointer[x + j.size] = i.int_group_pointer[x + j.size];
             } else if (regulator == 1) {
-                regulator = check_overflow(i.int_group_pointer[x + j.size],  1);
+                regulator = check_overflow(i.int_group_pointer[x + j.size], 1);
                 returned_big_int.int_group_pointer[x + j.size] = i.int_group_pointer[x + j.size] + 1;
             }
         }
         if (regulator == 1) {
             big_int big_int_one = make_big_int_from_int(1);
-            returned_big_int = big_int_extend(returned_big_int.int_group_pointer,returned_big_int.size,
+            returned_big_int = big_int_extend(returned_big_int.int_group_pointer, returned_big_int.size,
                                               big_int_one.int_group_pointer, big_int_one.size);
             //free(big_int_one.int_group_pointer);
         }
         return returned_big_int;
+
+    } else if (i.size < j.size) {
+        big_int returned_big_int = make_big_int_empty_large(j.size);
+        for (int a = 0; a < i.size; a++) {
+            if (regulator == 0) {
+                regulator = check_overflow(i.int_group_pointer[a], j.int_group_pointer[a]);
+                returned_big_int.int_group_pointer[a] = i.int_group_pointer[a] + j.int_group_pointer[a];
+            } else if (regulator == 1) {
+                regulator = check_overflow(i.int_group_pointer[a], j.int_group_pointer[a] + 1);
+                returned_big_int.int_group_pointer[a] = i.int_group_pointer[a] + j.int_group_pointer[a] + 1;
+            }
+        }
+        for (int b = 0; b < (j.size - i.size); b++) {
+            if (regulator == 0) {
+                returned_big_int.int_group_pointer[b + i.size] = j.int_group_pointer[b + i.size];
+            } else if (regulator == 1) {
+                regulator = check_overflow(j.int_group_pointer[b + i.size], 1);
+                returned_big_int.int_group_pointer[b + i.size] = j.int_group_pointer[b + i.size] + 1;
+            }
+        }
+        if (regulator == 1) {
+            big_int big_int_one = make_big_int_from_int(1);
+            returned_big_int = big_int_extend(returned_big_int.int_group_pointer, returned_big_int.size,
+                                              big_int_one.int_group_pointer, big_int_one.size);
+        }
+        return returned_big_int;
+    } else {
+        big_int returned_big_int = make_big_int_empty_large(i.size);
+        for (int c = 0; c < i.size; c++) {
+            if (regulator == 0) {
+                regulator = check_overflow(i.int_group_pointer[c], j.int_group_pointer[c]);
+                returned_big_int.int_group_pointer[c] = i.int_group_pointer[c] + j.int_group_pointer[c];
+            } else if (regulator == 1) {
+                if ((check_overflow(1, i.int_group_pointer[c]) == 1 || check_overflow(1, j.int_group_pointer[c] == 1)) &&
+                        check_overflow(i.int_group_pointer[c], j.int_group_pointer[c])) {
+
+                }
+                regulator = check_overflow(i.int_group_pointer[c], j.int_group_pointer[c] + 1);
+                returned_big_int.int_group_pointer[c] = i.int_group_pointer[c] + j.int_group_pointer[c] + 1;
+            }
+        }
+        if (regulator == 1) {
+            big_int big_int_one = make_big_int_from_int(1);
+            returned_big_int = big_int_extend(returned_big_int.int_group_pointer, returned_big_int.size,
+                                              big_int_one.int_group_pointer, big_int_one.size);
+        }
+        return returned_big_int;
+    }
+}
+
+short check_overflow(unsigned int x, unsigned int y) {
+    if (x > BIG_INT_MAX - y) {
+        return 1;
+    }
+    return 0;
+}
+
+void print_big_int_to(FILE *destination, big_int i) {
+    for (int j = 0; j < i.size; j++) {
+        fprintf(destination, "%u", i.int_group_pointer[j]); // here for fprintf, we use format %u to work
+        fprintf(destination, "%s", ", ");
+        // with unsigned integers.
+
+    }
+    fprintf(destination, "%s", "\n");
+}
+
+void print_big_int(big_int i) {
+    return print_big_int_to(stdout, i);
+}
+
+void big_int_Fibo(unsigned int input) {
+
+
+}
+
+void big_int_test_suite() {
+
+}
+
 //        if (regulator == 1) { // if the regulator is still 1 at the last place, then we have a special case
 //            regulator = check_overflow(i.int_group_pointer[j.size], 1); // here we check if there is overflow if we add into i's next place
 //            if (regulator == 0) { // if there will be no overflow from the one
@@ -100,47 +191,3 @@ big_int big_int_add(big_int i, big_int j) {
 //                }
 //            }
 //        }
-    } else if (i.size < j.size) {
-        big_int returned_big_int = make_big_int_empty_large(j.size);
-        for (int a = 0; a < i.size; a++) {
-            if (regulator == 0) {
-                regulator = check_overflow(i.int_group_pointer[a], j.int_group_pointer[a]);
-                returned_big_int.int_group_pointer[a] = i.int_group_pointer[a] + j.int_group_pointer[a];
-            } else if (regulator == 1) {
-                regulator = check_overflow(i.int_group_pointer[a], j.int_group_pointer[a] + 1);
-
-            }
-        }
-    } else {
-
-    }
-}
-
-short check_overflow(unsigned int x, unsigned int y){
-    if (x > BIG_INT_MAX - y) {
-        return 1;
-    }
-    return 0;
-}
-
-void print_big_int_to(FILE *destination, big_int i) {
-    for (int j = 0; j < i.size; j++) {
-        fprintf(destination, "%u", i.int_group_pointer[j]); // here for fprintf, we use format %u to work
-        // with unsigned integers.
-
-    }
-    fprintf(destination, "%s", "\n");
-}
-
-void print_big_int(big_int i) {
-    return print_big_int_to(stdout, i);
-}
-
-void big_int_Fibo(unsigned int input) {
-
-
-}
-
-void big_int_test_suite() {
-
-}

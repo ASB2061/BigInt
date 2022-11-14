@@ -63,5 +63,16 @@ int main() {
     std::cout << "Result: ";
     big_int bigIntAddition = big_int_add(big_int_TestAdd, one_big_int);
     print_big_int_to(stdout, bigIntAddition);
+
+    big_int big_int_TestAddTwo = make_big_int_empty_large(3);
+    for (int c = 0; c < 6; c++) {
+        big_int_TestAddTwo.int_group_pointer[c] = 4294967295;
+    }
+    big_int big_int_addition = big_int_add(big_int_TestAddTwo, big_int_TestAddTwo);
+
+    print_big_int_to(stdout, big_int_TestAddTwo);
+    print_big_int_to(stdout, big_int_TestAddTwo);
+
+    print_big_int_to(stdout, big_int_addition);
     std::cout << "all done" << std::endl;
 }
