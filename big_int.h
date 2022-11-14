@@ -36,11 +36,13 @@ big_int big_int_add(big_int i, big_int j);
 
 #include <stdio.h>
 
-short check_overflow(unsigned int x, unsigned int y);
+char check_overflow(unsigned int x, unsigned int y);
 
 void print_big_int_to(FILE *destination, big_int i);
 
 void print_big_int(big_int i);
+
+char big_int_comparator(big_int i, big_int j);
 
 void big_int_Fibo(unsigned int input);
 

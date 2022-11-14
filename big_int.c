@@ -5,6 +5,7 @@
 #include <bits/types/FILE.h>
 #include "big_int.h"
 #include <stdlib.h>
+#include <logic.h>
 
 /**
  * This is the .c file for the big_int class/struct. In order to construct big_int, we utilize malloc
@@ -63,7 +64,7 @@ big_int big_int_extend(unsigned int *first, unsigned int first_size, unsigned in
 }
 
 big_int big_int_add(big_int i, big_int j) {
-    short regulator = 0;
+    char regulator = 0;
     if (i.size > j.size) {
         big_int returned_big_int = make_big_int_empty_large(i.size);
         for (int z = 0; z < j.size; z++) {
@@ -71,6 +72,7 @@ big_int big_int_add(big_int i, big_int j) {
                 regulator = check_overflow(i.int_group_pointer[z], j.int_group_pointer[z]);
                 returned_big_int.int_group_pointer[z] = i.int_group_pointer[z] + j.int_group_pointer[z];
             } else if (regulator == 1) {
+
                 regulator = check_overflow(i.int_group_pointer[z], j.int_group_pointer[z] + 1);
                 returned_big_int.int_group_pointer[z] = i.int_group_pointer[z] + j.int_group_pointer[z] + 1;
             }
@@ -133,12 +135,14 @@ big_int big_int_add(big_int i, big_int j) {
                     // overflow, and we forget to add a carry to the next spot in the allocated block.
                     returned_big_int.int_group_pointer[c] = i.int_group_pointer[c] + j.int_group_pointer[c] + 1;
                     regulator = 1;
+                } else {
+                    regulator = check_overflow(i.int_group_pointer[c], j.int_group_pointer[c]);
+                    returned_big_int.int_group_pointer[c] = i.int_group_pointer[c] + j.int_group_pointer[c] + 1;
                 }
-//                regulator = check_overflow(i.int_group_pointer[c], j.int_group_pointer[c] + 1);
-//                returned_big_int.int_group_pointer[c] = i.int_group_pointer[c] + j.int_group_pointer[c] + 1;
             }
         }
-        if (regulator == 1) {
+        if (regulator == 1) { // if there is still a carry after going through both big_ints, we extend the returned big_int
+            // and add one to the new place
             big_int big_int_one = make_big_int_from_int(1);
             returned_big_int = big_int_extend(returned_big_int.int_group_pointer, returned_big_int.size,
                                               big_int_one.int_group_pointer, big_int_one.size);
@@ -147,43 +151,75 @@ big_int big_int_add(big_int i, big_int j) {
     }
 }
 
-short check_overflow(unsigned int x, unsigned int y) {
+/**
+ * Small helper function that checks for overflow using the idea that if the first term of your sum is larger than the
+ * difference of the max of UINT32 minus the second term, then there will be overflow.
+ * @param x the first term in the addition
+ * @param y the second term in the addition
+ * @return char data type, since we will always return only 0 or 1, so no need to use int or short. This will tell us
+ * whether or not a carry is required when adding big_ints
+ */
+char check_overflow(unsigned int x, unsigned int y) {
     if (x > BIG_INT_MAX - y) {
         return 1;
     }
     return 0;
 }
 
+/**
+ * This is the print function for big_int. Big_int is printed out in hexadecimal form with 0x leading the number.
+ * @param destination where to want to print the big_int
+ * @param i the big_int that will be are printed
+ */
 void print_big_int_to(FILE *destination, big_int i) {
-//    char* outputForPrint;
-//    outputForPrint = malloc(sizeof(char) * 8 * i.size);
-//    for (int j = 0; j < i.size; j++) {
-//        i.int_group_pointer[j];
-//        //outputForPrint[j] = i.int_group_pointer[j];
-//        // with unsigned integers.
-//        // fprintf(outputForPrint[j], "%08x", i.int_group_pointer[j]); // here for fprintf, we use format %u to work
-//        // fprintf(destination, "%s", ", ");
-//    }
-    for (int k = 0; k < i.size; k++) {
-        fprintf(destination, "%08x", i.int_group_pointer[i.size - k]);
+    fprintf(destination, "%s", "0x"); // first we add 0x, since we are displaying this in hexadecimal
+    // format
+    for (int k = 1; k <= i.size; k++) {
+        fprintf(destination, "%08x", i.int_group_pointer[i.size - k]); // we decrement so that we can
+        // print out the largest place first and the smallest last. The format "%08x" converts the unsigned int into
+        // hexadecimal and fills out zeros for any empty spots. Ex: 64 will be 0x00000040
     }
-
-//    fprintf(destination, "%08x", i.int_group_pointer[j]); // here for fprintf, we use format %u to work
-//    fprintf(destination, "%s", ", ");
-    fprintf(destination, "%s", "\n");
+    fprintf(destination, "%s", "\n"); // make sure to give an extra line for the next thing that is printed.
 }
 
+/**
+ * Simply redirects a request to print a big_int to stdout if the user does not wish to give an alternate destination
+ * @param i the big_int to be printed
+ */
 void print_big_int(big_int i) {
     return print_big_int_to(stdout, i);
+}
+/**
+ * Compares big_ints and returns 1 if the first parameter is greater than the second, 0 if the two are equal and -1 if
+ * the second term is larger than the first.
+ * @return
+ */
+char big_int_comparator(big_int i, big_int j) {
+    if (i.size > j.size) {
+        return 1;
+    } else if (i.size < j.size) {
+        return -1;
+    } else {
+        for (int d = 1; d <= i.size; d++) {
+            if (i.int_group_pointer[i.size - d] > j.int_group_pointer[i.size - d]) {
+                return 1;
+            } else if (i.int_group_pointer[i.size - d] < j.int_group_pointer[i.size - d]) {
+                return -1;
+            } else {
+                return 0;
+            }
+        }
+    }
 }
 
 void big_int_Fibo(unsigned int input) {
 
-
 }
 
 void big_int_test_suite() {
+    fprintf(stdout, "%s", "Testing Addition... \n");
 
+    // hccs_assert(big_int_comparator());
 }
 
 //        if (regulator == 1) { // if the regulator is still 1 at the last place, then we have a special case
@@ -208,3 +244,20 @@ void big_int_test_suite() {
 //                }
 //            }
 //        }
+
+//    char* outputForPrint;
+//    outputForPrint = malloc(sizeof(char) * 8 * i.size);
+//    for (int j = 0; j < i.size; j++) {
+//        i.int_group_pointer[j];
+//        //outputForPrint[j] = i.int_group_pointer[j];
+//        // with unsigned integers.
+//        // fprintf(outputForPrint[j], "%08x", i.int_group_pointer[j]); // here for fprintf, we use format %u to work
+//        // fprintf(destination, "%s", ", ");
+//    }
+
+
+//    fprintf(destination, "%08x", i.int_group_pointer[j]); // here for fprintf, we use format %u to work
+//    fprintf(destination, "%s", ", ");
+
+//                regulator = check_overflow(i.int_group_pointer[c], j.int_group_pointer[c] + 1);
+//                returned_big_int.int_group_pointer[c] = i.int_group_pointer[c] + j.int_group_pointer[c] + 1;

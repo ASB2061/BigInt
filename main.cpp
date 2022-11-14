@@ -50,11 +50,12 @@ int main() {
      * Testing with big_int_add here
      */
 
-    big_int big_int_TestAdd = make_big_int_empty_large(6);
+    big_int big_int_TestAdd = make_big_int_empty_large(2);
     for (int c = 0; c < 6; c++) {
         big_int_TestAdd.int_group_pointer[c] = 4294967295;
     }
     big_int one_big_int = make_big_int_from_int(1);
+
     std::cout << "Adding... " << std::endl;
     std::cout << "        ";
     print_big_int_to(stdout, big_int_TestAdd);
@@ -64,6 +65,7 @@ int main() {
     std::cout << "Result: ";
     big_int bigIntAddition = big_int_add(big_int_TestAdd, one_big_int);
     print_big_int_to(stdout, bigIntAddition);
+    std::cout << "\n";
 
     big_int big_int_TestAddTwo = make_big_int_empty_large(2);
     for (int c = 0; c < 6; c++) {
