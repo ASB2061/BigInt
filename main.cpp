@@ -80,8 +80,9 @@ int main() {
 
     big_int_test_suite();
     fprintf(stdout, "%s","\n\n\n\n");
-    unsigned int fiboInput = 300000;
+    unsigned int fiboInput = 10000;
     std::cout << "Testing the " << fiboInput <<" fibonacci value" << std::endl;
     big_int_Fibo(fiboInput);
+    std::cout << "\n";
     std::cout << "all done" << std::endl;
 }
