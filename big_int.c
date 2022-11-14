@@ -64,10 +64,16 @@ big_int big_int_extend(unsigned int *first, unsigned int first_size, unsigned in
 }
 
 /**
- * This function adds big_ints together.
- * @param i
- * @param j
- * @return
+ * This function adds big_ints together. There are two main cases that this program handles: big_ints of different size
+ * and big_ints of the same size. If they are the same size, we iterate through both and add them out together. If there
+ * is still a carry at the end of adding, we extend the big_int by one place and one. If they are of different sizes,
+ * we iterate through te smaller big_int and add the values with the larger big_int. Once we are done iterating through
+ * the smaller big_int, we iterate through the rest of the larger big_int and place that into the returned_big_int.
+ * During all additions, we verify that there is no overflow when performing addition. If there is, we set the char
+ * variable named "regulator" to one which will make sure that there is a carry for the next place in the big_int.
+ * @param i The first big_int
+ * @param j the second big_int
+ * @return a big_int that is the sum of big_int i and big_int j.
  */
 big_int big_int_add(big_int i, big_int j) {
     char regulator = 0; // this represents our carry. Since its value will only be 0 or 1, we set it as char since that
@@ -259,9 +265,65 @@ void big_int_Fibo(unsigned int input) {
 }
 
 void big_int_test_suite() {
+    fprintf(stdout, "%s", "Testing Printing... \nWe are printing big_int with 5 blocks for unsigned integers"
+                          " which will each hold the max for an unsigned integer 2^32 - 1.\nSince we are printing big_int"
+                          " in hexadecimal, our expected result should be:\n0xffffffffffffffffffffffffffffffffffffffff.\n");
+    big_int big_int_print_test;
+    big_int_print_test.int_group_pointer = (unsigned int *) malloc(5 * sizeof(unsigned int));
+    big_int_print_test.size = 5;
+    for (int i = 0; i < 5; i++) {
+        big_int_print_test.int_group_pointer[i] = 4294967295;
+    }
+    print_big_int(big_int_print_test);
+    free(big_int_print_test.int_group_pointer); // just to be safe
+    big_int_print_test.int_group_pointer = (unsigned int *) malloc(5 * sizeof(unsigned int));
+    fprintf(stdout, "%s", "We are printing big_int with 5 blocks for unsigned integers"
+                          "which will each hold 45000 * 100*i, so 45000, 45100, ... ,45400.\nSince we are printing big_int"
+                          "in hexadecimal, our expected result should be:\n0x0000B1580000B0F40000B0900000B02C0000AFC8.\n");
+    for (int i = 0; i < 5; i++) {
+        big_int_print_test.int_group_pointer[i] = 45000 + 100 * i;
+    }
+    print_big_int(big_int_print_test);
+    fprintf(stdout, "%s", "Finally, our last print test is a bit simpler. We will simply be printing the "
+                          "unsigned integer 7890001 in hexadecimal which will be represented by a big_int.\nThe expected"
+                          " result is:\n0x00786451.\n");
+    print_big_int(make_big_int_from_int(7890001));
     fprintf(stdout, "%s", "Testing Addition... \n");
-
-    assert(5 == 5);
+    fprintf(stdout, "%s", "The first big_ints we are adding are two big_ints which both store the max "
+                          "values\nof the unsigned integer. They are both of size 3. We expect a result of:\n0x00000001f"
+                          "ffffffffffffffffffffffe.\n");
+    big_int big_int_adder_one = make_big_int_empty_large(3);
+    big_int big_int_adder_two = make_big_int_empty_large(3);
+    for (int a = 0; a < 3; a++) {
+        big_int_adder_one.int_group_pointer[a] = 4294967295;
+        big_int_adder_two.int_group_pointer[a] = 4294967295;
+    }
+    big_int big_int_adder_solution_one = make_big_int_empty_large(4);
+    *(big_int_adder_solution_one.int_group_pointer) = 4294967294;
+    for (int a = 1; a < 3; a++) {
+        big_int_adder_solution_one.int_group_pointer[a] = 4294967295;
+    }
+    big_int_adder_solution_one.int_group_pointer[3] = 1;
+    big_int big_int_adder_attempt = big_int_add(big_int_adder_one, big_int_adder_two);
+    print_big_int(big_int_adder_attempt);
+    print_big_int(big_int_adder_solution_one);
+    assert(big_int_comparator(big_int_adder_attempt, big_int_adder_solution_one) == 0);
+    fprintf(stdout, "%s", "First addition is a success!\n");
+    fprintf(stdout, "%s", "The second test is adding a big_int with 5 max values and a big_int with the "
+                          "value of 1.\nWe expect to get a hexadecimal value that starts with 1 and ends with 40 zeros.\n");
+    big_int big_int_adder_three = make_big_int_empty_large(5);
+    for (int b = 0; b < 5; b++) {
+        big_int_adder_three.int_group_pointer[b] = 4294967295;
+    }
+    big_int big_int_adder_four = make_big_int_from_int(1);
+    big_int big_int_adder_attempt_two = big_int_add(big_int_adder_three, big_int_adder_four);
+    print_big_int(big_int_adder_attempt_two);
+    big_int big_int_adder_solution_two = make_big_int_empty_large(6);
+    for (int c = 0; c < 5; c++) {
+        big_int_adder_solution_two.int_group_pointer[c] = 0;
+    }
+    big_int_adder_solution_two.int_group_pointer[5] = 1;
+    assert(big_int_comparator(big_int_adder_attempt_two, big_int_adder_solution_two) == 0);
 }
 
 //        if (regulator == 1) { // if the regulator is still 1 at the last place, then we have a special case

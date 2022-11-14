@@ -77,5 +77,7 @@ int main() {
     print_big_int_to(stdout, big_int_TestAddTwo);
 
     print_big_int_to(stdout, big_int_addition);
+
+    big_int_test_suite();
     std::cout << "all done" << std::endl;
 }
