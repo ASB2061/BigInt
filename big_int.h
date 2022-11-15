@@ -26,6 +26,8 @@ typedef struct {
 
 big_int make_big_int();
 
+big_int make_big_int_from_big_int(big_int i);
+
 big_int make_big_int_from_int(unsigned int i);
 
 big_int make_big_int_empty_large(unsigned int i);

@@ -25,6 +25,14 @@ big_int make_big_int() {
     return newBigInt;
 }
 
+big_int make_big_int_from_big_int(big_int i) {
+    big_int returnable_big_int = make_big_int_empty_large(i.size);
+    for (int j = 0; j < i.size; j++) {
+        returnable_big_int.int_group_pointer[j] = i.int_group_pointer[j];
+    }
+    return returnable_big_int;
+}
+
 /**
  * As the name suggests,
  * @param i
@@ -263,45 +271,37 @@ char big_int_comparator(big_int i, big_int j) {
 void big_int_Fibo(unsigned int input) {
     big_int fNminusTwo = make_big_int_from_int(0); // f0 in the fibo sequence
     big_int fNminusOne = make_big_int_from_int(1); // f1 in the fibo sequence
-    big_int fN[input]; // make an array of big_ints that we can use to linearly find fN by adding fN-2 and fN-1
+    big_int fN; // make an array of big_ints that we can use to linearly find fN by adding fN-2 and fN-1
     unsigned int freeTracker = 0; // this tracks how many frees were made using
-    for (int i = 0; i < input; i++) {
-        if (i <= 1) {
-            fN[i] = big_int_add(fNminusOne, fNminusTwo);
-        } else if (i == 2) {
-            free(fNminusOne.int_group_pointer); // we free the two initial ones, since they are no longer needed in the
-            // free-store heap. it would be more efficient to get rid of them earlier. prior to i becoming 2 depending on how larg
-            free(fNminusTwo.int_group_pointer);
-            fN[i] = big_int_add(fN[i-1], fN[i-2]);
-            free(fN[0].int_group_pointer);
-            freeTracker+=3;
-        } else {
-            fN[i] = big_int_add(fN[i-1], fN[i-2]);
-
-//            *fNminusOne.int_group_pointer = *fNminusTwo.int_group_pointer;
-//            free(fNminusTwo.int_group_pointer);
-//            fNminusTwo.int_group_pointer = (unsigned int *) malloc(fN[i].size * sizeof(unsigned int));
-//            fNminusTwo.size = fN[i].size;
-//            for (int g = 0; g < fN[i].size; g++) {
-//                fNminusTwo.int_group_pointer[g] = fN[i].int_group_pointer[g];
-//            }
-            if (i >= 2) {
-                free(fN[i - 2].int_group_pointer);
-                freeTracker++;
-            }
+    if (input == 0) {
+        print_big_int(fNminusTwo);
+        free(fNminusTwo.int_group_pointer);
+        free(fNminusOne.int_group_pointer);
+        free(fN.int_group_pointer);
+        return;
+    } else if (input == 1) {
+        print_big_int(fNminusOne);
+        free(fNminusTwo.int_group_pointer);
+        free(fNminusOne.int_group_pointer);
+        free(fN.int_group_pointer);
+        return;
+    } else if (input >= 2) {
+        for (int i = 2; i <= input + 2; i++) { // since we are starting at two instead.
+//            if (i == 2) {
+//                fN = big_int_add(fNminusOne, fNminusTwo);
+//            } else if (i > 2) {
+                fN = big_int_add(fNminusOne, fNminusTwo);
+                free(fNminusOne.int_group_pointer);
+                fNminusOne = make_big_int_from_big_int(fNminusTwo);
+                free(fNminusTwo.int_group_pointer);
+                fNminusTwo = make_big_int_from_big_int(fN);
+                free(fN.int_group_pointer);
+            //}
         }
+        print_big_int(fNminusTwo);
+        free(fNminusTwo.int_group_pointer);
+        free(fNminusOne.int_group_pointer);
     }
-    free(fN[input - 2].int_group_pointer); // this pointer is missed with the current for loop so we add it at the
-    // end here.
-//    free(fN[input - 3].int_group_pointer);
-    fprintf(stdout, "%s", "\n");
-    print_big_int(fN[input - 1]);
-    free(fN[input - 1].int_group_pointer);
-    freeTracker+=2;
-    fprintf(stdout, "%s", "\nFrees: ");
-    fprintf(stdout, "%i", freeTracker);
-    fprintf(stdout, "%s", "\n");
-
 }
 
 void big_int_test_suite() {
