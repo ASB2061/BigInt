@@ -298,7 +298,7 @@ void big_int_Fibo(unsigned int input) {
                 free(fN.int_group_pointer);
             //}
         }
-        print_big_int(fNminusTwo);
+        print_big_int(fNminusOne);
         free(fNminusTwo.int_group_pointer);
         free(fNminusOne.int_group_pointer);
     }
