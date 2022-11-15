@@ -434,11 +434,11 @@ void big_int_test_suite() {
 
     fprintf(stdout, "%s", "The third test is adding a big_int with 5 values of 2^31 to 3 values of 2^31.\n"
                           "This will also lead to utilizing carries.\n");
-    big_int big_int_adder_five = make_big_int_empty_large(5);
+    big_int big_int_adder_five = make_big_int_empty_large(1);
     for (int d = 0; d < big_int_adder_five.size; d++) {
         big_int_adder_five.int_group_pointer[d] = 2147483648;
     }
-    big_int big_int_adder_six = make_big_int_empty_large(3);
+    big_int big_int_adder_six = make_big_int_empty_large(1);
     for (int d = 0; d < big_int_adder_six.size; d++) {
         big_int_adder_six.int_group_pointer[d] = 2147483648;
     }
