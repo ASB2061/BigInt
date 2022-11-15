@@ -71,6 +71,134 @@ big_int big_int_extend(unsigned int *first, unsigned int first_size, unsigned in
     return big_int_extension;
 }
 
+big_int *big_int_add_to(big_int *i, big_int j) {
+//    big_int result = big_int_add(*i, j);
+//    for (int r = 0; r < result.size; r++) {
+//        i->int_group_pointer[r] = result.int_group_pointer[r];
+//    }
+//    i->size = result.size;
+//    free(result.int_group_pointer);
+//    return i;
+
+    char regulator = 0; // this represents our carry. Since its value will only be 0 or 1, we set it as char since that
+    // is the smallest data type in C
+    if (i->size > j.size) { // if the first big int is larger than the second.
+        // larger big_int
+        for (int z = 0; z < j.size; z++) { // we iterate through the size of the smaller big_int
+            if (regulator == 0) { // if carry is 0
+                regulator = check_overflow(i->int_group_pointer[z], j.int_group_pointer[z]);
+                // check for overflow
+                i->int_group_pointer[z] += j.int_group_pointer[z];
+                // add the unsigned ints and place in i
+            } else if (regulator == 1) { // if the carry is one.
+                if ((check_overflow(i->int_group_pointer[z], 1) == 1 ||
+                     check_overflow(j.int_group_pointer[z], 1) == 1)) {
+                    /*
+                     * If there is a situation where adding a carry causes overflow, we account for that and set the
+                     * carry for the next
+                     */
+                    i->int_group_pointer[z] += (j.int_group_pointer[z] + 1);
+                    regulator = 1;
+                } else {
+                    // Otherwise, we add the carry as normal.
+                    regulator = check_overflow(i->int_group_pointer[z], j.int_group_pointer[z] + 1);
+                    i->int_group_pointer[z] += (j.int_group_pointer[z] + 1);
+                }
+            }
+        }
+
+        for (int x = 0; x < (i->size - j.size); x++) { // Next, we loop through the rest of the larger big_int and
+            // copy those values into returned_big_int
+            if (regulator == 0) {
+                return i; // if there is no carry left, we can just return i.
+            } else if (regulator == 1) {
+                // if there was overflow from some calculation prior to cycling through all the smaller big_int, we are
+                // covered
+                regulator = check_overflow(i->int_group_pointer[x + j.size], 1);
+                i->int_group_pointer[x + j.size] += 1;
+            }
+        }
+        if (regulator == 1) {
+            // if there is still a carry left, we extend the returned big int and add a one in that place.
+            big_int big_int_one = make_big_int_from_int(1);
+            *i = big_int_extend(i->int_group_pointer, i->size,
+                                big_int_one.int_group_pointer, big_int_one.size);
+        }
+        return i;
+
+    } else if (i->size < j.size) { // if the second big_int is larger than the first
+        for (int a = 0; a < i->size; a++) { // we iterate through the first big_int since it is the smaller one.
+            if (regulator == 0) { // if the carry is 0
+                regulator = check_overflow(i->int_group_pointer[a], j.int_group_pointer[a]); // check if we will need
+                // a carry
+                i->int_group_pointer[a] += j.int_group_pointer[a];
+            } else if (regulator == 1) {
+                if ((check_overflow(1, i->int_group_pointer[a]) == 1 ||
+                     check_overflow(1, j.int_group_pointer[a]) == 1)) { // this checks if a carry will cause us to
+                    // need another carry
+                    i->int_group_pointer[a] += (j.int_group_pointer[a] + 1);
+                    regulator = 1;
+                } else {
+                    // if the carry does not affect anything, then we add the carry normally and check for whether a carry will
+                    // be needed for the next step.
+                    regulator = check_overflow(i->int_group_pointer[a], j.int_group_pointer[a]);
+                    i->int_group_pointer[a] += (j.int_group_pointer[a] + 1);
+                }
+            }
+        }
+        int differenceOfSize = j.size - i->size;
+        big_int temp_extender = make_big_int_empty_large(differenceOfSize);
+        *i = big_int_extend(i->int_group_pointer, i->size, temp_extender.int_group_pointer, temp_extender.size);
+        for (int b = 0;
+             b < (differenceOfSize); b++) { // go through the rest of the terms in the second (larger) big_int
+            if (regulator == 0) {
+                // if the carry is zero, no need to continually check for overflow since we are just setting the higher
+                // places in returned_big_int's array to j's values.
+                i->int_group_pointer[b + i->size] = j.int_group_pointer[b + i->size];
+            } else if (regulator == 1) {
+                // if there is a carry, then we make sure to add it in.
+                regulator = check_overflow(j.int_group_pointer[b + i->size], 1);
+                i->int_group_pointer[b + i->size] = j.int_group_pointer[b + i->size] + 1;
+            }
+        }
+        if (regulator == 1) {
+            // if there is still a carry, we extend the returned_big_int and add one to the highest place.
+            big_int big_int_one = make_big_int_from_int(1);
+            *i = big_int_extend(i->int_group_pointer, i->size, big_int_one.int_group_pointer, big_int_one.size);
+        }
+        return i;
+    } else { /**
+             * If the length of the big_ints are equivalent. We follow this set of for loops.
+             */
+        for (int c = 0; c < i->size; c++) {
+            if (regulator == 0) { // if there is no carry from the previous addition.
+                regulator = check_overflow(i->int_group_pointer[c], j.int_group_pointer[c]); // check for overflow
+                i->int_group_pointer[c] += j.int_group_pointer[c];
+            } else if (regulator == 1) {
+                if ((check_overflow(1, i->int_group_pointer[c]) == 1 ||
+                     check_overflow(1, j.int_group_pointer[c] == 1))) { // this checks for a
+                    // possible edge case where the carry can cause overflow on one of the terms when checking for
+                    // overflow, and we forget to add a carry to the next spot in the allocated block.
+                    i->int_group_pointer[c] += (j.int_group_pointer[c] + 1);
+                    regulator = 1;
+                } else { // if this is a normal case of overflow, we proceed as normal
+                    regulator = check_overflow(i->int_group_pointer[c], j.int_group_pointer[c]); // set up the carry
+                    // for the next place
+                    i->int_group_pointer[c] += (j.int_group_pointer[c] + 1);
+                    // include a one since there was a carry
+                }
+            }
+        }
+        if (regulator == 1) {
+            // if there is still a carry after going through both big_ints, we extend i
+            // and add one to the new place
+            big_int big_int_one = make_big_int_from_int(1);
+            *i = big_int_extend(i->int_group_pointer, i->size, big_int_one.int_group_pointer, big_int_one.size);
+        }
+        return i;
+    }
+}
+
 /**
  * This function adds big_ints together. There are two main cases that this program handles: big_ints of different size
  * and big_ints of the same size. If they are the same size, we iterate through both and add them out together. If there
@@ -148,7 +276,7 @@ big_int big_int_add(big_int i, big_int j) {
                     // if the carry does not affect anything, then we add the carry normally and check for whether a carry will
                     // be needed for the next step.
                     regulator = check_overflow(i.int_group_pointer[a], j.int_group_pointer[a]);
-                    returned_big_int.int_group_pointer[a] = i.int_group_pointer[a] + j.int_group_pointer[a];
+                    returned_big_int.int_group_pointer[a] = i.int_group_pointer[a] + j.int_group_pointer[a] + 1;
                 }
             }
         }
@@ -244,6 +372,28 @@ void print_big_int(big_int i) {
     return print_big_int_to(stdout, i);
 }
 
+
+/**
+ * Verifies whether two big_ints are equal or not. Returns 1 if true and 0 if false. Utilizes the comparator
+ * designed to be a helper function.
+ * @param i
+ * @param j
+ * @return
+ */
+char isEqual(big_int i, big_int j) {
+    switch (big_int_comparator(i, j)) {
+        case 1:
+            return 0;
+            break;
+        case 0:
+            return 1;
+            break;
+        case -1:
+            return 0;
+            break;
+    }
+}
+
 /**
  * Compares big_ints and returns 1 if the first parameter is greater than the second, 0 if the two are equal and -1 if
  * the second term is larger than the first.
@@ -335,132 +485,167 @@ big_int big_int_Fibo(unsigned int input) {
 }
 
 void big_int_test_suite() {
-    fprintf(stdout, "%s", "Test Suite Running...\n\n\n");
-    fprintf(stdout, "%s",
-            "Testing Printing... \n_______________________________________________________\nWe are printing big_int with 5 blocks for unsigned integers"
-            " which will each hold the max for an unsigned integer 2^32 - 1.\nSince we are printing big_int"
-            " in hexadecimal, our expected result should be:\n0xffffffffffffffffffffffffffffffffffffffff.\n");
-    big_int big_int_print_test;
-    big_int_print_test.int_group_pointer = (unsigned int *) malloc(5 * sizeof(unsigned int));
-    big_int_print_test.size = 5;
-    for (int i = 0; i < 5; i++) {
-        big_int_print_test.int_group_pointer[i] = 4294967295;
-    }
-    fprintf(stdout, "%s", "Printed result:\n");
-    print_big_int(big_int_print_test);
-    free(big_int_print_test.int_group_pointer); // once our big_ints are no longer being used we free them to prevent
-    // memory leakage.
-    big_int big_int_print_two = make_big_int_empty_large(5);
-    fprintf(stdout, "%s", "\nWe are printing big_int with 5 blocks for unsigned integers"
-                          " which will each hold 45000 * 100*i, so 45000, 45100, ... ,45400.\nSince we are printing big_int"
-                          " in hexadecimal, our expected result should be:\n0x0000B1580000B0F40000B0900000B02C0000AFC8.\n");
-    for (int i = 0; i < 5; i++) {
-        big_int_print_two.int_group_pointer[i] = 45000 + 100 * i;
-    }
-    fprintf(stdout, "%s", "Printed result:\n");
-    print_big_int(big_int_print_two);
-    free(big_int_print_two.int_group_pointer); // once our big_ints are no longer being used we free them to prevent
-    // memory leakage.
-    fprintf(stdout, "%s", "\nFinally, our last print test is a bit simpler. We will simply be printing the "
-                          "unsigned integer 7890001 in hexadecimal\nwhich will be represented by a big_int. The expected"
-                          " result is:\n0x00786451.\n");
-    big_int big_int_print_three = make_big_int_from_int(7890001);
-    fprintf(stdout, "%s", "Printed result:\n");
-    print_big_int(big_int_print_three);
-    free(big_int_print_three.int_group_pointer); // once our big_ints are no longer being used we free them to prevent
-    // memory leakage.
-    fprintf(stdout, "%s", "\n_________________________________________________________\nTesting Addition... \n\n");
-    fprintf(stdout, "%s", "The first big_ints we are adding are two big_ints which both store the max "
-                          "values\nof the unsigned integer. They are both of size 3. We expect a result of:\n0x00000001f"
-                          "ffffffffffffffffffffffe.\nThis is a notable corner case, since adding a carry to either of them"
-                          " in each place would lead to undetected overflow\nin a program that is not careful; this overflow would occur when the carry causes overflow on one of the big_ints.\n\n");
-    big_int big_int_adder_one = make_big_int_empty_large(3);
-    big_int big_int_adder_two = make_big_int_empty_large(3);
-    for (int a = 0; a < 3; a++) {
-        big_int_adder_one.int_group_pointer[a] = 4294967295;
-        big_int_adder_two.int_group_pointer[a] = 4294967295;
-    }
-    big_int big_int_adder_solution_one = make_big_int_empty_large(4);
-    for (int a = 0; a < 4; a++) {
-        if (a == 0) {
-            *(big_int_adder_solution_one.int_group_pointer) = 4294967294;
-        } else if (a > 0 && a < 3) {
-            big_int_adder_solution_one.int_group_pointer[a] = 4294967295;
-        } else {
-            big_int_adder_solution_one.int_group_pointer[a] = 1;
+    if (0 == 0) {
+        fprintf(stdout, "%s", "Test Suite Running...\n\n\n");
+        fprintf(stdout, "%s",
+                "Testing Printing... \n_______________________________________________________\nWe are printing big_int with 5 blocks for unsigned integers"
+                " which will each hold the max for an unsigned integer 2^32 - 1.\nSince we are printing big_int"
+                " in hexadecimal, our expected result should be:\n0xffffffffffffffffffffffffffffffffffffffff.\n");
+        big_int big_int_print_test;
+        big_int_print_test.int_group_pointer = (unsigned int *) malloc(5 * sizeof(unsigned int));
+        big_int_print_test.size = 5;
+        for (int i = 0; i < 5; i++) {
+            big_int_print_test.int_group_pointer[i] = 4294967295;
         }
+        fprintf(stdout, "%s", "Printed result:\n");
+        print_big_int(big_int_print_test);
+        free(big_int_print_test.int_group_pointer); // once our big_ints are no longer being used we free them to prevent
+        // memory leakage.
+        big_int big_int_print_two = make_big_int_empty_large(5);
+        fprintf(stdout, "%s", "\nWe are printing big_int with 5 blocks for unsigned integers"
+                              " which will each hold 45000 * 100*i, so 45000, 45100, ... ,45400.\nSince we are printing big_int"
+                              " in hexadecimal, our expected result should be:\n0x0000B1580000B0F40000B0900000B02C0000AFC8.\n");
+        for (int i = 0; i < 5; i++) {
+            big_int_print_two.int_group_pointer[i] = 45000 + 100 * i;
+        }
+        fprintf(stdout, "%s", "Printed result:\n");
+        print_big_int(big_int_print_two);
+        free(big_int_print_two.int_group_pointer); // once our big_ints are no longer being used we free them to prevent
+        // memory leakage.
+        fprintf(stdout, "%s", "\nFinally, our last print test is a bit simpler. We will simply be printing the "
+                              "unsigned integer 7890001 in hexadecimal\nwhich will be represented by a big_int. The expected"
+                              " result is:\n0x00786451.\n");
+        big_int big_int_print_three = make_big_int_from_int(7890001);
+        fprintf(stdout, "%s", "Printed result:\n");
+        print_big_int(big_int_print_three);
+        free(big_int_print_three.int_group_pointer); // once our big_ints are no longer being used we free them to prevent
+        // memory leakage.
+        fprintf(stdout, "%s", "\n_________________________________________________________\nTesting Addition... \n\n");
+        fprintf(stdout, "%s", "The first big_ints we are adding are two big_ints which both store the max "
+                              "values\nof the unsigned integer. They are both of size 3. We expect a result of:\n0x00000001f"
+                              "ffffffffffffffffffffffe.\nThis is a notable corner case, since adding a carry to either of them"
+                              " in each place would lead to undetected overflow\nin a program that is not careful; this overflow would occur when the carry causes overflow on one of the big_ints.\n\n");
+        big_int big_int_adder_one = make_big_int_empty_large(3);
+        big_int big_int_adder_two = make_big_int_empty_large(3);
+        for (int a = 0; a < 3; a++) {
+            big_int_adder_one.int_group_pointer[a] = 4294967295;
+            big_int_adder_two.int_group_pointer[a] = 4294967295;
+        }
+        big_int big_int_adder_solution_one = make_big_int_empty_large(4);
+        for (int a = 0; a < 4; a++) {
+            if (a == 0) {
+                *(big_int_adder_solution_one.int_group_pointer) = 4294967294;
+            } else if (a > 0 && a < 3) {
+                big_int_adder_solution_one.int_group_pointer[a] = 4294967295;
+            } else {
+                big_int_adder_solution_one.int_group_pointer[a] = 1;
+            }
+        }
+        big_int big_int_adder_attempt = big_int_add(big_int_adder_one, big_int_adder_two);
+        free(big_int_adder_one.int_group_pointer); // once our big_ints are no longer being used we free them to prevent
+        // memory leakage.
+        free(big_int_adder_two.int_group_pointer);
+        fprintf(stdout, "%s", "Printed attempt result:\n");
+        print_big_int(big_int_adder_attempt);
+        assert(big_int_comparator(big_int_adder_attempt, big_int_adder_solution_one) == 0);
+        free(big_int_adder_solution_one.int_group_pointer); // once our big_ints are no longer being used we free them to prevent
+        // memory leakage.
+        free(big_int_adder_attempt.int_group_pointer);
+
+
+        fprintf(stdout, "%s", "First addition is a success!\n\n");
+        fprintf(stdout, "%s", "The second test is adding a big_int with 5 max values and a big_int with the "
+                              "value of 1.\nWe expect to get a hexadecimal value that starts with 1 and ends with 40 zeros.\n");
+
+        big_int big_int_adder_three = make_big_int_empty_large(5);
+        for (int b = 0; b < 5; b++) {
+            big_int_adder_three.int_group_pointer[b] = 4294967295;
+        }
+        big_int big_int_adder_four = make_big_int_from_int(1);
+
+        big_int big_int_adder_attempt_two = big_int_add(big_int_adder_three, big_int_adder_four);
+        free(big_int_adder_three.int_group_pointer);
+        free(big_int_adder_four.int_group_pointer);
+        big_int big_int_adder_solution_two = make_big_int_empty_large(6);
+        for (int c = 0; c < 6; c++) {
+            if (c < 5) {
+                big_int_adder_solution_two.int_group_pointer[c] = 0;
+            } else {
+                big_int_adder_solution_two.int_group_pointer[c] = 1;
+            }
+        }
+        fprintf(stdout, "%s", "Expected result:\n");
+        print_big_int(big_int_adder_solution_two);
+        fprintf(stdout, "%s", "Printed attempted result:\n");
+        print_big_int(big_int_adder_attempt_two);
+        assert(big_int_comparator(big_int_adder_attempt_two, big_int_adder_solution_two) == 0);
+        free(big_int_adder_attempt_two.int_group_pointer);
+        free(big_int_adder_solution_two.int_group_pointer);
+        fprintf(stdout, "%s", "Second addition is a success.\n\n");
+
+        fprintf(stdout, "%s", "The third test is adding a big_int with 4 values of 2^31 to 6 values of 2^31.\n"
+                              "This will also lead to utilizing carries.\n");
+        big_int big_int_adder_five = make_big_int_empty_large(8);
+        for (int d = 0; d < big_int_adder_five.size; d++) {
+            big_int_adder_five.int_group_pointer[d] = 2147483648;
+        }
+        big_int big_int_adder_six = make_big_int_empty_large(7);
+        for (int d = 0; d < big_int_adder_six.size; d++) {
+            big_int_adder_six.int_group_pointer[d] = 2147483648;
+        }
+        big_int big_int_adder_solution_three = make_big_int_empty_large(8);
+        for (int c = 0; c < big_int_adder_solution_three.size; c++) {
+            if (c == 0) {
+                big_int_adder_solution_three.int_group_pointer[c] = 0;
+            } else if (c < big_int_adder_solution_three.size - 1) {
+                big_int_adder_solution_three.int_group_pointer[c] = 1;
+            } else {
+                big_int_adder_solution_three.int_group_pointer[c] = 2147483649;
+            }
+        }
+        big_int big_int_adder_attempt_three = big_int_add(big_int_adder_five, big_int_adder_six);
+//    print_big_int(big_int_adder_five);
+//    print_big_int(big_int_adder_six);
+        free(big_int_adder_five.int_group_pointer);
+        free(big_int_adder_six.int_group_pointer);
+        fprintf(stdout, "%s", "Expected result:\n");
+        print_big_int(big_int_adder_solution_three);
+        fprintf(stdout, "%s", "Printed attempted result:\n");
+        print_big_int(big_int_adder_attempt_three);
+        //assert(big_int_comparator(big_int_adder_attempt_three, big_int_adder_solution_three) == 0);
+        free(big_int_adder_attempt_three.int_group_pointer);
+        free(big_int_adder_solution_three.int_group_pointer);
     }
-    big_int big_int_adder_attempt = big_int_add(big_int_adder_one, big_int_adder_two);
-    free(big_int_adder_one.int_group_pointer); // once our big_ints are no longer being used we free them to prevent
-    // memory leakage.
-    free(big_int_adder_two.int_group_pointer);
-    fprintf(stdout, "%s", "Printed attempt result:\n");
-    print_big_int(big_int_adder_attempt);
-    assert(big_int_comparator(big_int_adder_attempt, big_int_adder_solution_one) == 0);
-    free(big_int_adder_solution_one.int_group_pointer); // once our big_ints are no longer being used we free them to prevent
-    // memory leakage.
-    free(big_int_adder_attempt.int_group_pointer);
+    fprintf(stdout, "%s", "Third addition is a success.\n\n_______________________________________________"
+                          "____\n\nQuick Testing of Add to...\n\nHere we are adding a big_int with 6 unsigned int maxes to "
+                          " 70.\n");
 
-
-    fprintf(stdout, "%s", "First addition is a success!\n\n");
-    fprintf(stdout, "%s", "The second test is adding a big_int with 5 max values and a big_int with the "
-                          "value of 1.\nWe expect to get a hexadecimal value that starts with 1 and ends with 40 zeros.\n");
-
-    big_int big_int_adder_three = make_big_int_empty_large(5);
-    for (int b = 0; b < 5; b++) {
-        big_int_adder_three.int_group_pointer[b] = 4294967295;
+    big_int big_int_add_to_test = make_big_int_empty_large(6);
+    for (int u = 0; u < big_int_add_to_test.size; u++) {
+        big_int_add_to_test.int_group_pointer[u] = 4294967295;
     }
-    big_int big_int_adder_four = make_big_int_from_int(1);
-
-    big_int big_int_adder_attempt_two = big_int_add(big_int_adder_three, big_int_adder_four);
-    free(big_int_adder_three.int_group_pointer);
-    free(big_int_adder_four.int_group_pointer);
-    big_int big_int_adder_solution_two = make_big_int_empty_large(6);
-    for (int c = 0; c < 6; c++) {
-        if (c < 5) {
-            big_int_adder_solution_two.int_group_pointer[c] = 0;
+    big_int big_int_add_to_test_second = make_big_int_from_int(70);
+    big_int_add_to(&big_int_add_to_test, big_int_add_to_test_second);
+    fprintf(stdout, "%s", "Printed attempted result:\n");
+    print_big_int(big_int_add_to_test);
+//    print_big_int(big_int_add_to_test_second);
+    big_int expected_result = make_big_int_empty_large(7);
+    for (int i = 0; i < expected_result.size; i++) {
+        if (i == 0) {
+            expected_result.int_group_pointer[i] = 69;
+        } else if (i == 6) {
+            expected_result.int_group_pointer[i] = 1;
         } else {
-            big_int_adder_solution_two.int_group_pointer[c] = 1;
+            expected_result.int_group_pointer[i] = 0;
         }
     }
     fprintf(stdout, "%s", "Expected result:\n");
-    print_big_int(big_int_adder_solution_two);
-    fprintf(stdout, "%s", "Printed attempted result:\n");
-    print_big_int(big_int_adder_attempt_two);
-    assert(big_int_comparator(big_int_adder_attempt_two, big_int_adder_solution_two) == 0);
-    free(big_int_adder_attempt_two.int_group_pointer);
-    free(big_int_adder_solution_two.int_group_pointer);
-    fprintf(stdout, "%s", "Second addition is a success.\n\n");
+    print_big_int(expected_result);
+    // assert(isEqual(expected_result, big_int_add_to_test) == 1);
+    free(big_int_add_to_test.int_group_pointer);
+    free(big_int_add_to_test_second.int_group_pointer);
+    free(expected_result.int_group_pointer);
 
-    fprintf(stdout, "%s", "The third test is adding a big_int with 5 values of 2^31 to 3 values of 2^31.\n"
-                          "This will also lead to utilizing carries.\n");
-    big_int big_int_adder_five = make_big_int_empty_large(1);
-    for (int d = 0; d < big_int_adder_five.size; d++) {
-        big_int_adder_five.int_group_pointer[d] = 2147483648;
-    }
-    big_int big_int_adder_six = make_big_int_empty_large(1);
-    for (int d = 0; d < big_int_adder_six.size; d++) {
-        big_int_adder_six.int_group_pointer[d] = 2147483648;
-    }
-    big_int big_int_adder_solution_three = make_big_int_empty_large(2);
-    for (int c = 0; c < big_int_adder_solution_three.size; c++) {
-        if (c == 0) {
-            big_int_adder_solution_three.int_group_pointer[c] = 0;
-        } else {
-            big_int_adder_solution_three.int_group_pointer[c] = 1;
-        }
-    }
-    big_int big_int_adder_attempt_three = big_int_add(big_int_adder_five, big_int_adder_six);
-    free(big_int_adder_five.int_group_pointer);
-    free(big_int_adder_six.int_group_pointer);
-    fprintf(stdout, "%s", "Expected result:\n");
-    print_big_int(big_int_adder_solution_three);
-    fprintf(stdout, "%s", "Printed attempted result:\n");
-    print_big_int(big_int_adder_attempt_three);
-    free(big_int_adder_attempt_three.int_group_pointer);
-    free(big_int_adder_solution_three.int_group_pointer);
-    assert(big_int_comparator(big_int_adder_attempt_three, big_int_adder_solution_three) == 0);
-    fprintf(stdout, "%s", "Third addition is a success.\n\n");
 
 }
 
