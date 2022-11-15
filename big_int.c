@@ -442,8 +442,25 @@ void big_int_test_suite() {
     for (int d = 0; d < big_int_adder_six.size; d++) {
         big_int_adder_six.int_group_pointer[d] = 2147483648;
     }
-
-
+    big_int big_int_adder_solution_three = make_big_int_empty_large(2);
+    for (int c = 0; c < big_int_adder_solution_three.size; c++) {
+        if (c == 0) {
+            big_int_adder_solution_three.int_group_pointer[c] = 0;
+        } else {
+            big_int_adder_solution_three.int_group_pointer[c] = 1;
+        }
+    }
+    big_int big_int_adder_attempt_three = big_int_add(big_int_adder_five, big_int_adder_six);
+    free(big_int_adder_five.int_group_pointer);
+    free(big_int_adder_six.int_group_pointer);
+    fprintf(stdout, "%s", "Expected result:\n");
+    print_big_int(big_int_adder_solution_three);
+    fprintf(stdout, "%s", "Printed attempted result:\n");
+    print_big_int(big_int_adder_attempt_three);
+    free(big_int_adder_attempt_three.int_group_pointer);
+    free(big_int_adder_solution_three.int_group_pointer);
+    assert(big_int_comparator(big_int_adder_attempt_three, big_int_adder_solution_three) == 0);
+    fprintf(stdout, "%s", "Third addition is a success.\n\n");
 
 }
 
