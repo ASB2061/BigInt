@@ -41,6 +41,8 @@ big_int *big_int_add_to(big_int* i, big_int j);
 
 big_int big_int_add(big_int i, big_int j);
 
+unsigned int big_int_to_int(big_int j);
+
 #include <stdio.h>
 
 char check_overflow(unsigned int x, unsigned int y);
@@ -52,6 +54,8 @@ char isEqual(big_int i, big_int j);
 char isGreater(big_int i, big_int j);
 
 char isLesser(big_int i, big_int j);
+
+void destroyBigInt(big_int j);
 
 void print_big_int_to(FILE *destination, big_int i);
 

@@ -20,14 +20,21 @@ int main() {
     // unsigned int inputFibo = 93; // note that 93 is the highest fibonacci value that can be calculated with DoubleInt
     // std::cout << "Testing Fibonacci DoubleInt test function with input " << inputFibo << std::endl;
     // DoubleIntTestFibonacci(inputFibo);
+    //    output_Big_Int.int_group_pointer = (unsigned int *) malloc(sizeof(unsigned int) * 3);
+//    output_Big_Int.size = 3;
+//    destroyBigInt(output_Big_Int);
+//    free(output_for_Fibo.int_group_pointer);
+//    big_int output_Big_Int = make_big_int();
 
     big_int_test_suite();
-    fprintf(stdout, "%s","\n\n\n\n");
-    unsigned int fiboInput = 100;
-    std::cout << "Testing the " << fiboInput <<" fibonacci value" << std::endl;
+    fprintf(stdout, "%s", "_____________________________________________________________\n");
+    unsigned int fiboInput = 1000;
+    std::cout << "Testing the " << fiboInput << " fibonacci value" << std::endl;
     big_int output_for_Fibo = big_int_Fibo(fiboInput);
     print_big_int(output_for_Fibo);
-    free(output_for_Fibo.int_group_pointer);
+    destroyBigInt(output_for_Fibo);
+
+
     std::cout << "\n";
     std::cout << "all done" << std::endl;
 }
