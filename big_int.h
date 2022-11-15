@@ -33,6 +33,8 @@ big_int make_big_int_from_int(unsigned int i);
 
 big_int make_big_int_empty_large(unsigned int i);
 
+big_int big_int_extendByBigInt(big_int first, big_int second);
+
 big_int big_int_extend(unsigned int *first, unsigned int first_size, unsigned int *second, unsigned int second_size);
 
 big_int *big_int_add_to(big_int* i, big_int j);
@@ -46,6 +48,10 @@ char check_overflow(unsigned int x, unsigned int y);
 char isZero(big_int i);
 
 char isEqual(big_int i, big_int j);
+
+char isGreater(big_int i, big_int j);
+
+char isLesser(big_int i, big_int j);
 
 void print_big_int_to(FILE *destination, big_int i);
 

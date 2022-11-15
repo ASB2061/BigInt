@@ -25,6 +25,11 @@ big_int make_big_int() {
     return newBigInt;
 }
 
+/**
+ * Makes a copy of big_int from a big_int parameter.
+ * @param i
+ * @return
+ */
 big_int make_big_int_from_big_int(big_int i) {
     big_int returnable_big_int = make_big_int_empty_large(i.size);
     for (int j = 0; j < i.size; j++) {
@@ -34,7 +39,7 @@ big_int make_big_int_from_big_int(big_int i) {
 }
 
 /**
- * As the name suggests,
+ * As the name suggests, makes a big_int from an integer input
  * @param i
  * @return
  */
@@ -48,6 +53,12 @@ big_int make_big_int_from_int(unsigned int i) {
     return newBigInt;
 }
 
+/**
+ * Makes an empty big_int that allocates i spaces of memory in the free-store heap. Thus, do not have to write out
+ * the malloc statement every time just to be a bit more efficient.
+ * @param i
+ * @return an empty big_int with i spaces allocated.
+ */
 big_int make_big_int_empty_large(unsigned int i) {
     big_int newBigInt; // creates an empty big_int struct
     newBigInt.int_group_pointer = (unsigned int *) malloc(i * sizeof(unsigned int)); // allocates "i" spots of
@@ -59,6 +70,25 @@ big_int make_big_int_empty_large(unsigned int i) {
     return newBigInt;
 }
 
+/**
+ * Simply redirects to the extend function. Note that these big_ints are freed when used, so be sure that this is the last time that you are usign them.
+ * @param first
+ * @param second
+ * @return
+ */
+big_int big_int_extendByBigInt(big_int first, big_int second) {
+    return big_int_extend(first.int_group_pointer, first.size, second.int_group_pointer, second.size);
+}
+
+/**
+ * Cycles through the first set of memory in the free-store heap and puts that into the big_int then places the second
+ * piece of allocated memory into the big_int. these allocated pieces are freed and a big_int is returned.
+ * @param first
+ * @param first_size
+ * @param second
+ * @param second_size
+ * @return
+ */
 big_int big_int_extend(unsigned int *first, unsigned int first_size, unsigned int *second, unsigned int second_size) {
     big_int big_int_extension;
     big_int_extension.int_group_pointer = (unsigned int *) malloc((first_size + second_size) * sizeof(unsigned int));
@@ -75,7 +105,9 @@ big_int big_int_extend(unsigned int *first, unsigned int first_size, unsigned in
 }
 
 /**
- * This function adds onto the first parameter given with the second parameter.
+ * This function adds onto the first parameter given with the second parameter. The inside of the code is much more
+ * detailed for how this works. Essentially takes a very similar approach to big_int_add except for the use of arrows
+ * for i to point to the intgrouppointer and size.
  * @param i a pointer to a big_int
  * @param j a big_int
  * @return a pointer to a big_int
@@ -475,6 +507,32 @@ char isZero(big_int i) {
 }
 
 /**
+ * Simply redirects to comparator and returns 1 if true and 0 if false.
+ * @param i
+ * @param j
+ * @return
+ */
+char isGreater(big_int i, big_int j) {
+    if (big_int_comparator(i, j) == 1) {
+        return 1;
+    }
+    return 0;
+}
+
+/**
+ * Simply redirects to comparator helper function and returns 1 if true and 0 if fals.e
+ * @param i
+ * @param j
+ * @return
+ */
+char isLesser(big_int i, big_int j) {
+    if (big_int_comparator(i, j) == -1) {
+        return 1;
+    }
+    return 0;
+}
+
+/**
  * This is the big_int_Fibo function. It calculates the nth term of the fibonacci sequence. Based on some testing, there
  * have been no memory issues with this function up to 1 million as the input for big_int_Fibo (using val_grind). This function uses a
  * linear way of calculating the nth term by having three big_ints: fn-1, fn-2 and fn. We make sure to free pointers
@@ -681,38 +739,100 @@ void big_int_test_suite() {
         free(big_int_add_to_test.int_group_pointer);
         free(big_int_add_to_test_second.int_group_pointer);
         free(expected_result.int_group_pointer);
-    }
-    fprintf(stdout, "%s", "First add to test is successful!\n\nSecond test of add_to.\nAdding a big_int with"
-                          " 7 2^31 to a big_int with 6 2^31. We expect that the answer will be of size 7.\n\n");
-    big_int added_to = make_big_int_empty_large(1);
-    for (int z = 0; z < added_to.size; z++) {
-        added_to.int_group_pointer[z] = 2147483648;
-    }
-    big_int to_adder = make_big_int_empty_large(2);
-    for (int z = 0; z < added_to.size; z++) {
-        to_adder.int_group_pointer[z] = 2147483648;
-    }
-    print_big_int(big_int_add(to_adder, added_to));
-    big_int_add_to(&added_to, to_adder);
-    free(to_adder.int_group_pointer);
-    fprintf(stdout,"%s", "Attempted Result:\n");
-    print_big_int(added_to);
-    big_int add_to_solution = make_big_int_empty_large(2);
-    for (int b = 0; b < add_to_solution.size; b++) {
-        if (b == 0) {
-            add_to_solution.int_group_pointer[b] = 0;
-        } else if (b < 1) {
-            add_to_solution.int_group_pointer[b] = 1;
-        }
-        else {
-            add_to_solution.int_group_pointer[b] = 2147483649;
-        }
-    }
-    fprintf(stdout, "%s", "Expected result:\n");
 
-    assert(isEqual(add_to_solution, added_to) == 1);
-    fprintf(stdout, "%s", "Test Successful.\n\nBrief Extension Test:\n\n");
+        fprintf(stdout, "%s", "First add to test is successful!\n\nSecond test of add_to.\nAdding a big_int with"
+                              " 5 2^31 to a big_int with 4 2^31. We expect that the answer will be of size 5.\n\n");
+        big_int added_to = make_big_int_empty_large(4);
+        for (int z = 0; z < added_to.size; z++) {
+            added_to.int_group_pointer[z] = 2147483648;
+        }
+//    print_big_int(added_to);
+        big_int to_adder = make_big_int_empty_large(5);
+        for (int z = 0; z < to_adder.size; z++) {
+            to_adder.int_group_pointer[z] = 2147483648;
+        }
+//    print_big_int(to_adder);
+        fprintf(stdout, "%s", "\n\n\nTesting out adder...\n");
+        fprintf(stdout, "%s", "Expected result:\n");
+        big_int verify_add_to = big_int_add(to_adder, added_to);
+        print_big_int(verify_add_to);
+        big_int_add_to(&added_to, to_adder);
+        free(to_adder.int_group_pointer);
+        fprintf(stdout, "%s", "Attempted Result:\n");
+        print_big_int(added_to);
+        big_int add_to_solution = make_big_int_empty_large(5);
+        for (int b = 0; b < add_to_solution.size; b++) {
+            if (b == 0) {
+                add_to_solution.int_group_pointer[b] = 0;
+            } else if (b <= 3) {
+                add_to_solution.int_group_pointer[b] = 1;
+            } else {
+                add_to_solution.int_group_pointer[b] = 2147483649;
+            }
+        }
+//    print_big_int(add_to_solution);
+        assert(isEqual(add_to_solution, added_to) == 1 && isEqual(added_to, verify_add_to) == 1);
+        free(added_to.int_group_pointer);
+        free(add_to_solution.int_group_pointer);
+        free(verify_add_to.int_group_pointer);
+        fprintf(stdout, "%s",
+                "Test Successful.\n\nThird add to test. Adding to big_ints of same size of 5 with uint maxes.\n\n");
+        big_int big_int_added_to_three;
+        big_int_added_to_three.int_group_pointer = (unsigned int *) malloc(sizeof(unsigned int) * 5);
+        big_int_added_to_three.size = 5;
+        for (int c = 0; c < big_int_added_to_three.size; c++) {
+            big_int_added_to_three.int_group_pointer[c] = 4294967295;
+        }
+        big_int big_int_add_to_four;
+        big_int_add_to_four.int_group_pointer = (unsigned int *) malloc(sizeof(unsigned int) * 5);
+        big_int_add_to_four.size = 5;
+        for (int c = 0; c < big_int_added_to_three.size; c++) {
+            big_int_add_to_four.int_group_pointer[c] = 4294967295;
+        }
+        big_int solution_four = big_int_add(big_int_added_to_three, big_int_add_to_four);
+        big_int_add_to(&big_int_added_to_three, big_int_add_to_four);
+        fprintf(stdout, "%s", "Expected Result:\n");
+        print_big_int(solution_four);
+        fprintf(stdout, "%s", "Attempted Result:\n");
+        print_big_int(big_int_added_to_three);
+        assert(isEqual(big_int_added_to_three, solution_four) == 1);
+        free(big_int_added_to_three.int_group_pointer);
+        free(solution_four.int_group_pointer);
+        free(big_int_add_to_four.int_group_pointer);
+        fprintf(stdout, "%s",
+                "_________________________________________________________\nWorking on Quick Extend Test. Extending a big_int with size 5 and all ones with a big_int of size 3 and all tens.\n\n");
+        big_int big_extend = make_big_int_empty_large(5);
+        for (int c = 0; c < big_extend.size; c++) {
+            big_extend.int_group_pointer[c] = 1;
+        }
+        big_int big_extender = make_big_int_empty_large(3);
+        for (int c = 0; c < big_extender.size; c++) {
+            big_extender.int_group_pointer[c] = 10;
+        }
+        big_extend = big_int_extendByBigInt(big_extend, big_extender);
+        fprintf(stdout, "%s", "Attempted Result:\n");
+        print_big_int(big_extend);
+        big_int extend_solution = make_big_int_empty_large(8);
+        for (int c = 0; c < extend_solution.size; c++) {
+            if (c < 5) {
+                extend_solution.int_group_pointer[c] = 1;
+            } else {
+                extend_solution.int_group_pointer[c] = 10;
+            }
+        }
+        fprintf(stdout, "%s", "Expected Result:\n");
+        print_big_int(extend_solution);
+        assert(isEqual(big_extend, extend_solution) == 1);
+        free(big_extend.int_group_pointer);
+        free(extend_solution.int_group_pointer);
+
+        fprintf(stdout, "%s",
+                "\n\n_________________________________________________________\nTesting out isZero and comparator functions.");
+        big_int zeroBigInt = make_big_int_from_int(0);
+        assert(isZero(zeroBigInt) == 1);
+    }
 }
+
 
 
 //// Code Graveyard
