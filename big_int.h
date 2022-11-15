@@ -6,7 +6,8 @@
 #define BIGINT_BIG_INT_H
 
 /**
- * This is the header file that contains the base type, function names with parameters, and the struct.
+ * This is the header file that contains the base type, function names with parameters, and the struct. Look under
+ * big_int.c for detailed documentation on each function.
  * */
 
 #if defined __cplusplus // read this "etern C" line _only_ when we're using C++
@@ -40,13 +41,15 @@ big_int big_int_add(big_int i, big_int j);
 
 char check_overflow(unsigned int x, unsigned int y);
 
+char isZero(big_int i);
+
 void print_big_int_to(FILE *destination, big_int i);
 
 void print_big_int(big_int i);
 
 char big_int_comparator(big_int i, big_int j);
 
-void big_int_Fibo(unsigned int input);
+big_int big_int_Fibo(unsigned int input);
 
 void big_int_test_suite();
 
