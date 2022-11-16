@@ -10,7 +10,10 @@
 /**
  * This is the .c file for the big_int class/struct. In order to construct big_int, we utilize malloc
  * to allocate space on the free store heap and construct unsigned int arrays that will store numbers
- * larger than unsigned int (2^32 -1).
+ * larger than unsigned int (2^32 -1). This class is careful with using a destructor in order to carefully manage memory
+ * in the free-store heap. Thus, when testing with valgrind we have found 0 leaks and 0 errors including 0 suppressed
+ * errors; this is shown in a screenshot of testing for the millionth term in the fibonacci sequence where there were
+ * zero leaks.
  */
 
 
@@ -621,356 +624,362 @@ big_int big_int_Fibo(unsigned int input) {
     }
 }
 
+/**
+ * This test suite tests all of the functions available to the big_int struct. We test print(), extend(), add(), add_to(),
+ * isEqual(), isZero(), isGreater(), isLesser() and big_int_to_int(). We print in stdout more details about each test and
+ * what exactly is going on. If these tests fail, an assert will cause an error and the program will stop.
+ */
 void big_int_test_suite() {
-    if (0 == 0) {
-        fprintf(stdout, "%s", "Test Suite Running...\n\n\n");
-        fprintf(stdout, "%s",
-                "Testing Printing... \n_______________________________________________________\nWe are printing big_int with 5 blocks for unsigned integers"
-                " which will each hold the max for an unsigned integer 2^32 - 1.\nSince we are printing big_int"
-                " in hexadecimal, our expected result should be:\n0xffffffffffffffffffffffffffffffffffffffff.\n");
-        big_int big_int_print_test;
-        big_int_print_test.int_group_pointer = (unsigned int *) malloc(5 * sizeof(unsigned int));
-        big_int_print_test.size = 5;
-        for (int i = 0; i < 5; i++) {
-            big_int_print_test.int_group_pointer[i] = 4294967295;
+    fprintf(stdout, "%s", "Test Suite Running...\n\n\n");
+    fprintf(stdout, "%s",
+            "Testing Printing... \n_______________________________________________________\nWe are printing big_int with 5 blocks for unsigned integers"
+            " which will each hold the max for an unsigned integer 2^32 - 1.\nSince we are printing big_int"
+            " in hexadecimal, our expected result should be:\n0xffffffffffffffffffffffffffffffffffffffff.\n");
+    big_int big_int_print_test;
+    big_int_print_test.int_group_pointer = (unsigned int *) malloc(5 * sizeof(unsigned int));
+    big_int_print_test.size = 5;
+    for (int i = 0; i < 5; i++) {
+        big_int_print_test.int_group_pointer[i] = 4294967295;
+    }
+    fprintf(stdout, "%s", "Printed result:\n");
+    print_big_int(big_int_print_test);
+    destroyBigInt(big_int_print_test); // once our big_ints are no longer being used we free them to prevent
+    // memory leakage.
+    big_int big_int_print_two = make_big_int_empty_large(5);
+    fprintf(stdout, "%s", "\nWe are printing big_int with 5 blocks for unsigned integers"
+                          " which will each hold 45000 * 100*i, so 45000, 45100, ... ,45400.\nSince we are printing big_int"
+                          " in hexadecimal, our expected result should be:\n0x0000B1580000B0F40000B0900000B02C0000AFC8.\n");
+    for (int i = 0; i < 5; i++) {
+        big_int_print_two.int_group_pointer[i] = 45000 + 100 * i;
+    }
+    fprintf(stdout, "%s", "Printed result:\n");
+    print_big_int(big_int_print_two);
+    destroyBigInt(big_int_print_two); // once our big_ints are no longer being used we free them to prevent
+    // memory leakage.
+    fprintf(stdout, "%s", "\nFinally, our last print test is a bit simpler. We will simply be printing the "
+                          "unsigned integer 7890001 in hexadecimal\nwhich will be represented by a big_int. The expected"
+                          " result is:\n0x00786451.\n");
+    big_int big_int_print_three = make_big_int_from_int(7890001);
+    fprintf(stdout, "%s", "Printed result:\n");
+    print_big_int(big_int_print_three);
+    destroyBigInt(big_int_print_three); // once our big_ints are no longer being used we free them to prevent
+    // memory leakage.
+    fprintf(stdout, "%s", "\n_________________________________________________________\nTesting Addition... \n\n");
+    fprintf(stdout, "%s", "The first big_ints we are adding are two big_ints which both store the max "
+                          "values\nof the unsigned integer. They are both of size 3. We expect a result of:\n0x00000001f"
+                          "ffffffffffffffffffffffe.\nThis is a notable corner case, since adding a carry to either of them"
+                          " in each place would lead to undetected overflow\nin a program that is not careful; this overflow would occur when the carry causes overflow on one of the big_ints.\n\n");
+    big_int big_int_adder_one = make_big_int_empty_large(3);
+    big_int big_int_adder_two = make_big_int_empty_large(3);
+    for (int a = 0; a < 3; a++) {
+        big_int_adder_one.int_group_pointer[a] = 4294967295;
+        big_int_adder_two.int_group_pointer[a] = 4294967295;
+    }
+    big_int big_int_adder_solution_one = make_big_int_empty_large(4);
+    for (int a = 0; a < 4; a++) {
+        if (a == 0) {
+            *(big_int_adder_solution_one.int_group_pointer) = 4294967294;
+        } else if (a > 0 && a < 3) {
+            big_int_adder_solution_one.int_group_pointer[a] = 4294967295;
+        } else {
+            big_int_adder_solution_one.int_group_pointer[a] = 1;
         }
-        fprintf(stdout, "%s", "Printed result:\n");
-        print_big_int(big_int_print_test);
-        destroyBigInt(big_int_print_test); // once our big_ints are no longer being used we free them to prevent
-        // memory leakage.
-        big_int big_int_print_two = make_big_int_empty_large(5);
-        fprintf(stdout, "%s", "\nWe are printing big_int with 5 blocks for unsigned integers"
-                              " which will each hold 45000 * 100*i, so 45000, 45100, ... ,45400.\nSince we are printing big_int"
-                              " in hexadecimal, our expected result should be:\n0x0000B1580000B0F40000B0900000B02C0000AFC8.\n");
-        for (int i = 0; i < 5; i++) {
-            big_int_print_two.int_group_pointer[i] = 45000 + 100 * i;
-        }
-        fprintf(stdout, "%s", "Printed result:\n");
-        print_big_int(big_int_print_two);
-        destroyBigInt(big_int_print_two); // once our big_ints are no longer being used we free them to prevent
-        // memory leakage.
-        fprintf(stdout, "%s", "\nFinally, our last print test is a bit simpler. We will simply be printing the "
-                              "unsigned integer 7890001 in hexadecimal\nwhich will be represented by a big_int. The expected"
-                              " result is:\n0x00786451.\n");
-        big_int big_int_print_three = make_big_int_from_int(7890001);
-        fprintf(stdout, "%s", "Printed result:\n");
-        print_big_int(big_int_print_three);
-        destroyBigInt(big_int_print_three); // once our big_ints are no longer being used we free them to prevent
-        // memory leakage.
-        fprintf(stdout, "%s", "\n_________________________________________________________\nTesting Addition... \n\n");
-        fprintf(stdout, "%s", "The first big_ints we are adding are two big_ints which both store the max "
-                              "values\nof the unsigned integer. They are both of size 3. We expect a result of:\n0x00000001f"
-                              "ffffffffffffffffffffffe.\nThis is a notable corner case, since adding a carry to either of them"
-                              " in each place would lead to undetected overflow\nin a program that is not careful; this overflow would occur when the carry causes overflow on one of the big_ints.\n\n");
-        big_int big_int_adder_one = make_big_int_empty_large(3);
-        big_int big_int_adder_two = make_big_int_empty_large(3);
-        for (int a = 0; a < 3; a++) {
-            big_int_adder_one.int_group_pointer[a] = 4294967295;
-            big_int_adder_two.int_group_pointer[a] = 4294967295;
-        }
-        big_int big_int_adder_solution_one = make_big_int_empty_large(4);
-        for (int a = 0; a < 4; a++) {
-            if (a == 0) {
-                *(big_int_adder_solution_one.int_group_pointer) = 4294967294;
-            } else if (a > 0 && a < 3) {
-                big_int_adder_solution_one.int_group_pointer[a] = 4294967295;
-            } else {
-                big_int_adder_solution_one.int_group_pointer[a] = 1;
-            }
-        }
-        big_int big_int_adder_attempt = big_int_add(big_int_adder_one, big_int_adder_two);
-        destroyBigInt(big_int_adder_one); // once our big_ints are no longer being used we free them to prevent
-        // memory leakage.
-        destroyBigInt(big_int_adder_two);
-        fprintf(stdout, "%s", "Printed attempt result:\n");
-        print_big_int(big_int_adder_attempt);
-        assert(big_int_comparator(big_int_adder_attempt, big_int_adder_solution_one) == 0);
-        destroyBigInt(big_int_adder_solution_one); // once our big_ints are no longer being used we free them to prevent
-        // memory leakage.
-        destroyBigInt(big_int_adder_attempt);
+    }
+    big_int big_int_adder_attempt = big_int_add(big_int_adder_one, big_int_adder_two);
+    destroyBigInt(big_int_adder_one); // once our big_ints are no longer being used we free them to prevent
+    // memory leakage.
+    destroyBigInt(big_int_adder_two);
+    fprintf(stdout, "%s", "Printed attempt result:\n");
+    print_big_int(big_int_adder_attempt);
+    assert(big_int_comparator(big_int_adder_attempt, big_int_adder_solution_one) == 0);
+    destroyBigInt(big_int_adder_solution_one); // once our big_ints are no longer being used we free them to prevent
+    // memory leakage.
+    destroyBigInt(big_int_adder_attempt);
 
 
-        fprintf(stdout, "%s", "First addition is a success!\n\n");
-        fprintf(stdout, "%s", "The second test is adding a big_int with 5 max values and a big_int with the "
-                              "value of 1.\nWe expect to get a hexadecimal value that starts with 1 and ends with 40 zeros.\n");
+    fprintf(stdout, "%s", "First addition is a success!\n\n");
+    fprintf(stdout, "%s", "The second test is adding a big_int with 5 max values and a big_int with the "
+                          "value of 1.\nWe expect to get a hexadecimal value that starts with 1 and ends with 40 zeros.\n");
 
-        big_int big_int_adder_three = make_big_int_empty_large(5);
-        for (int b = 0; b < 5; b++) {
-            big_int_adder_three.int_group_pointer[b] = 4294967295;
-        }
-        big_int big_int_adder_four = make_big_int_from_int(1);
+    big_int big_int_adder_three = make_big_int_empty_large(5);
+    for (int b = 0; b < 5; b++) {
+        big_int_adder_three.int_group_pointer[b] = 4294967295;
+    }
+    big_int big_int_adder_four = make_big_int_from_int(1);
 
-        big_int big_int_adder_attempt_two = big_int_add(big_int_adder_three, big_int_adder_four);
-        destroyBigInt(big_int_adder_three);
-        destroyBigInt(big_int_adder_four);
-        big_int big_int_adder_solution_two = make_big_int_empty_large(6);
-        for (int c = 0; c < 6; c++) {
-            if (c < 5) {
-                big_int_adder_solution_two.int_group_pointer[c] = 0;
-            } else {
-                big_int_adder_solution_two.int_group_pointer[c] = 1;
-            }
+    big_int big_int_adder_attempt_two = big_int_add(big_int_adder_three, big_int_adder_four);
+    destroyBigInt(big_int_adder_three);
+    destroyBigInt(big_int_adder_four);
+    big_int big_int_adder_solution_two = make_big_int_empty_large(6);
+    for (int c = 0; c < 6; c++) {
+        if (c < 5) {
+            big_int_adder_solution_two.int_group_pointer[c] = 0;
+        } else {
+            big_int_adder_solution_two.int_group_pointer[c] = 1;
         }
-        fprintf(stdout, "%s", "Expected result:\n");
-        print_big_int(big_int_adder_solution_two);
-        fprintf(stdout, "%s", "Printed attempted result:\n");
-        print_big_int(big_int_adder_attempt_two);
-        assert(big_int_comparator(big_int_adder_attempt_two, big_int_adder_solution_two) == 0);
-        destroyBigInt(big_int_adder_attempt_two);
-        destroyBigInt(big_int_adder_solution_two);
-        fprintf(stdout, "%s", "Second addition is a success.\n\n");
+    }
+    fprintf(stdout, "%s", "Expected result:\n");
+    print_big_int(big_int_adder_solution_two);
+    fprintf(stdout, "%s", "Printed attempted result:\n");
+    print_big_int(big_int_adder_attempt_two);
+    assert(big_int_comparator(big_int_adder_attempt_two, big_int_adder_solution_two) == 0);
+    destroyBigInt(big_int_adder_attempt_two);
+    destroyBigInt(big_int_adder_solution_two);
+    fprintf(stdout, "%s", "Second addition is a success.\n\n");
 
-        fprintf(stdout, "%s", "The third test is adding a big_int with 4 values of 2^31 to 6 values of 2^31.\n"
-                              "This will also lead to utilizing carries.\n");
-        big_int big_int_adder_five = make_big_int_empty_large(8);
-        for (int d = 0; d < big_int_adder_five.size; d++) {
-            big_int_adder_five.int_group_pointer[d] = 2147483648;
+    fprintf(stdout, "%s", "The third test is adding a big_int with 4 values of 2^31 to 6 values of 2^31.\n"
+                          "This will also lead to utilizing carries.\n");
+    big_int big_int_adder_five = make_big_int_empty_large(8);
+    for (int d = 0; d < big_int_adder_five.size; d++) {
+        big_int_adder_five.int_group_pointer[d] = 2147483648;
+    }
+    big_int big_int_adder_six = make_big_int_empty_large(7);
+    for (int d = 0; d < big_int_adder_six.size; d++) {
+        big_int_adder_six.int_group_pointer[d] = 2147483648;
+    }
+    big_int big_int_adder_solution_three = make_big_int_empty_large(8);
+    for (int c = 0; c < big_int_adder_solution_three.size; c++) {
+        if (c == 0) {
+            big_int_adder_solution_three.int_group_pointer[c] = 0;
+        } else if (c < big_int_adder_solution_three.size - 1) {
+            big_int_adder_solution_three.int_group_pointer[c] = 1;
+        } else {
+            big_int_adder_solution_three.int_group_pointer[c] = 2147483649;
         }
-        big_int big_int_adder_six = make_big_int_empty_large(7);
-        for (int d = 0; d < big_int_adder_six.size; d++) {
-            big_int_adder_six.int_group_pointer[d] = 2147483648;
-        }
-        big_int big_int_adder_solution_three = make_big_int_empty_large(8);
-        for (int c = 0; c < big_int_adder_solution_three.size; c++) {
-            if (c == 0) {
-                big_int_adder_solution_three.int_group_pointer[c] = 0;
-            } else if (c < big_int_adder_solution_three.size - 1) {
-                big_int_adder_solution_three.int_group_pointer[c] = 1;
-            } else {
-                big_int_adder_solution_three.int_group_pointer[c] = 2147483649;
-            }
-        }
-        big_int big_int_adder_attempt_three = big_int_add(big_int_adder_five, big_int_adder_six);
+    }
+    big_int big_int_adder_attempt_three = big_int_add(big_int_adder_five, big_int_adder_six);
 //    print_big_int(big_int_adder_five);
 //    print_big_int(big_int_adder_six);
-        destroyBigInt(big_int_adder_five);
-        destroyBigInt(big_int_adder_six);
-        fprintf(stdout, "%s", "Expected result:\n");
-        print_big_int(big_int_adder_solution_three);
-        fprintf(stdout, "%s", "Printed attempted result:\n");
-        print_big_int(big_int_adder_attempt_three);
-        //assert(big_int_comparator(big_int_adder_attempt_three, big_int_adder_solution_three) == 0);
-        destroyBigInt(big_int_adder_attempt_three);
-        destroyBigInt(big_int_adder_solution_three);
+    destroyBigInt(big_int_adder_five);
+    destroyBigInt(big_int_adder_six);
+    fprintf(stdout, "%s", "Expected result:\n");
+    print_big_int(big_int_adder_solution_three);
+    fprintf(stdout, "%s", "Printed attempted result:\n");
+    print_big_int(big_int_adder_attempt_three);
+    //assert(big_int_comparator(big_int_adder_attempt_three, big_int_adder_solution_three) == 0);
+    destroyBigInt(big_int_adder_attempt_three);
+    destroyBigInt(big_int_adder_solution_three);
 
-        fprintf(stdout, "%s", "Third addition is a success.\n\n_______________________________________________"
-                              "____\n\nQuick Testing of Add to...\n\nHere we are adding a big_int with 6 unsigned int maxes to "
-                              " 70. Note how the size of the big_int increases to 7.\n");
+    fprintf(stdout, "%s", "Third addition is a success.\n\n_______________________________________________"
+                          "____\n\nQuick Testing of Add to...\n\nHere we are adding a big_int with 6 unsigned int maxes to "
+                          " 70. Note how the size of the big_int increases to 7.\n");
 
-        big_int big_int_add_to_test = make_big_int_empty_large(6);
-        for (int u = 0; u < big_int_add_to_test.size; u++) {
-            big_int_add_to_test.int_group_pointer[u] = 4294967295;
-        }
-        big_int big_int_add_to_test_second = make_big_int_from_int(70);
-        big_int_add_to(&big_int_add_to_test, big_int_add_to_test_second);
-        fprintf(stdout, "%s", "Printed attempted result:\n");
-        print_big_int(big_int_add_to_test);
-//    print_big_int(big_int_add_to_test_second);
-        big_int expected_result = make_big_int_empty_large(7);
-        for (int i = 0; i < expected_result.size; i++) {
-            if (i == 0) {
-                expected_result.int_group_pointer[i] = 69;
-            } else if (i == 6) {
-                expected_result.int_group_pointer[i] = 1;
-            } else {
-                expected_result.int_group_pointer[i] = 0;
-            }
-        }
-        fprintf(stdout, "%s", "Expected result:\n");
-        print_big_int(expected_result);
-        assert(isEqual(expected_result, big_int_add_to_test) == 1);
-        destroyBigInt(big_int_add_to_test);
-        destroyBigInt(big_int_add_to_test_second);
-        destroyBigInt(expected_result);
-
-        fprintf(stdout, "%s", "First add to test is successful!\n\nSecond test of add_to.\nAdding a big_int with"
-                              " 5 2^31 to a big_int with 4 2^31. We expect that the answer will be of size 5.\n\n");
-        big_int added_to = make_big_int_empty_large(4);
-        for (int z = 0; z < added_to.size; z++) {
-            added_to.int_group_pointer[z] = 2147483648;
-        }
-//    print_big_int(added_to);
-        big_int to_adder = make_big_int_empty_large(5);
-        for (int z = 0; z < to_adder.size; z++) {
-            to_adder.int_group_pointer[z] = 2147483648;
-        }
-//    print_big_int(to_adder);
-        fprintf(stdout, "%s", "\n\n\nTesting out adder...\n");
-        fprintf(stdout, "%s", "Expected result:\n");
-        big_int verify_add_to = big_int_add(to_adder, added_to);
-        print_big_int(verify_add_to);
-        big_int_add_to(&added_to, to_adder);
-        destroyBigInt(to_adder);
-        fprintf(stdout, "%s", "Attempted Result:\n");
-        print_big_int(added_to);
-        big_int add_to_solution = make_big_int_empty_large(5);
-        for (int b = 0; b < add_to_solution.size; b++) {
-            if (b == 0) {
-                add_to_solution.int_group_pointer[b] = 0;
-            } else if (b <= 3) {
-                add_to_solution.int_group_pointer[b] = 1;
-            } else {
-                add_to_solution.int_group_pointer[b] = 2147483649;
-            }
-        }
-//    print_big_int(add_to_solution);
-        assert(isEqual(add_to_solution, added_to) == 1 && isEqual(added_to, verify_add_to) == 1);
-        destroyBigInt(added_to);
-        destroyBigInt(add_to_solution);
-        destroyBigInt(verify_add_to);
-        fprintf(stdout, "%s",
-                "Test Successful.\n\nThird add to test. Adding to big_ints of same size of 5 with uint maxes.\n\n");
-        big_int big_int_added_to_three;
-        big_int_added_to_three.int_group_pointer = (unsigned int *) malloc(sizeof(unsigned int) * 5);
-        big_int_added_to_three.size = 5;
-        for (int c = 0; c < big_int_added_to_three.size; c++) {
-            big_int_added_to_three.int_group_pointer[c] = 4294967295;
-        }
-        big_int big_int_add_to_four;
-        big_int_add_to_four.int_group_pointer = (unsigned int *) malloc(sizeof(unsigned int) * 5);
-        big_int_add_to_four.size = 5;
-        for (int c = 0; c < big_int_added_to_three.size; c++) {
-            big_int_add_to_four.int_group_pointer[c] = 4294967295;
-        }
-        big_int solution_four = big_int_add(big_int_added_to_three, big_int_add_to_four);
-        big_int_add_to(&big_int_added_to_three, big_int_add_to_four);
-        fprintf(stdout, "%s", "Expected Result:\n");
-        print_big_int(solution_four);
-        fprintf(stdout, "%s", "Attempted Result:\n");
-        print_big_int(big_int_added_to_three);
-        assert(isEqual(big_int_added_to_three, solution_four) == 1);
-        destroyBigInt(big_int_added_to_three);
-        destroyBigInt(solution_four);
-        destroyBigInt(big_int_add_to_four);
-        fprintf(stdout, "%s",
-                "_________________________________________________________\nWorking on Quick Extend Test. Extending a big_int with size 5 and all ones with a big_int of size 3 and all tens.\n\n");
-        big_int big_extend = make_big_int_empty_large(5);
-        for (int c = 0; c < big_extend.size; c++) {
-            big_extend.int_group_pointer[c] = 1;
-        }
-        big_int big_extender = make_big_int_empty_large(3);
-        for (int c = 0; c < big_extender.size; c++) {
-            big_extender.int_group_pointer[c] = 10;
-        }
-        big_extend = big_int_extendByBigInt(big_extend, big_extender);
-        fprintf(stdout, "%s", "Attempted Result:\n");
-        print_big_int(big_extend);
-        big_int extend_solution = make_big_int_empty_large(8);
-        for (int c = 0; c < extend_solution.size; c++) {
-            if (c < 5) {
-                extend_solution.int_group_pointer[c] = 1;
-            } else {
-                extend_solution.int_group_pointer[c] = 10;
-            }
-        }
-        fprintf(stdout, "%s", "Expected Result:\n");
-        print_big_int(extend_solution);
-        assert(isEqual(big_extend, extend_solution) == 1);
-        destroyBigInt(big_extend);
-        destroyBigInt(extend_solution);
-
-        fprintf(stdout, "%s",
-                "Test passed!\n\n_________________________________________________________\nTesting out isZero and comparator functions.\n");
-        big_int zeroBigInt = make_big_int_from_int(0);
-        print_big_int(zeroBigInt);
-        assert(isZero(zeroBigInt) == 1);
-        fprintf(stdout, "%s", "\nZero test passed!\n");
-        destroyBigInt(zeroBigInt);
-
-        fprintf(stdout, "%s",
-                "\nSecond Zero test for a corner case where all of the places in a big_int are zero, but\n"
-                "big_int's size is greater than 0. In this case, the size of this big_int is 1000.\n");
-        big_int big_int_zero;
-        big_int_zero.int_group_pointer = (unsigned int *) malloc(1000 * sizeof(unsigned int));
-        big_int_zero.size = 1000;
-        for (int a = 0; a < big_int_zero.size; a++) {
-            big_int_zero.int_group_pointer[a] = 0;
-        }
-        assert(isZero(big_int_zero));
-        destroyBigInt(big_int_zero);
-        fprintf(stdout, "%s", "\nSecond zero test passed!\n");
-        big_int greaterBigInt = make_big_int();
-        greaterBigInt.int_group_pointer = (unsigned int *) malloc(100 * sizeof(unsigned int));
-        greaterBigInt.size = 100;
-        for (int g = 0; g < greaterBigInt.size; g++) {
-            greaterBigInt.int_group_pointer[g] = 800;
-        }
-        fprintf(stdout, "%s", "\nLarger Big_int: 100 places with the number 800\n");
-        // print_big_int(greaterBigInt);
-        big_int lesserBigInt = make_big_int();
-        lesserBigInt.int_group_pointer = (unsigned int *) malloc(sizeof(unsigned int) * 100);
-        lesserBigInt.size = 99;
-        for (int g = 0; g < lesserBigInt.size; g++) {
-            lesserBigInt.int_group_pointer[g] = 799;
-        }
-        fprintf(stdout, "%s", "\nSmaller Big_int: 99 places with the number 799\n");
-        // print_big_int(lesserBigInt);
-        assert(isGreater(greaterBigInt, lesserBigInt) == 1);
-        fprintf(stdout, "%s", "\nGreater-than test passed!\nEquality Test:");
-        destroyBigInt(greaterBigInt);
-        destroyBigInt(lesserBigInt);
-
-        big_int equalOne;
-        big_int equalTwo;
-        equalOne.int_group_pointer = (unsigned int *) malloc(9000 * sizeof(unsigned int));
-        equalOne.size = 9000;
-        equalTwo.int_group_pointer = (unsigned int *) malloc(9000 * sizeof(unsigned int));
-        equalTwo.size = 9000;
-        for (int n = 0; n < equalOne.size; n++) {
-            equalOne.int_group_pointer[n] = 10000;
-        }
-        fprintf(stdout, "%s", "\nFirst term in equality: 9000 places with the number 10000\n");
-        // print_big_int(equalOne);
-        for (int n = 0; n < equalTwo.size; n++) {
-            equalTwo.int_group_pointer[n] = 10000;
-        }
-        fprintf(stdout, "%s", "\nSecond term in equality: 9000 places with the number 10000\n");
-        // print_big_int(equalTwo);
-        assert(isEqual(equalOne, equalTwo) == 1);
-        fprintf(stdout, "%s", "\nEquality test passed.\nNow lesser-than test.\n");
-        destroyBigInt(equalOne);
-        destroyBigInt(equalTwo);
-
-        big_int lesserThan;
-        big_int greaterThan;
-        lesserThan.int_group_pointer = (unsigned int *) malloc(100000 * sizeof(unsigned int));
-        lesserThan.size = 100000;
-        for (int t = 0; t < lesserThan.size; t++) {
-            if (t == 0) {
-                lesserThan.int_group_pointer[t] = 1999999;
-            } else {
-                lesserThan.int_group_pointer[t] = 2000000;
-            }
-        }
-        fprintf(stdout, "%s", "\nFirst Term is 99999 places with 2 million and the last place with 1.999 million.\n");
-        greaterThan.int_group_pointer = (unsigned int *) malloc(100000 * sizeof(unsigned int));
-        greaterThan.size = 100000;
-        for (int t = 0; t < greaterThan.size; t++) {
-            greaterThan.int_group_pointer[t] = 2000000;
-        }
-        fprintf(stdout, "%s", "\nSecond Term is 100000 places with 2 million.\n");
-        assert(isLesser(lesserThan, greaterThan) == 1);
-        destroyBigInt(lesserThan);
-        destroyBigInt(greaterThan);
-        fprintf(stdout, "%s",
-                "\nLesser than test complete. All comparators tested!\nNow big_int to unsigned int testing.\nThis test "
-                "has a big_int with 8000 places with the number 8000.\nbig_int to int will print something saying it "
-                "could only output the last spot if one of the spots\nhigher than zero are greater than zero.\n");
-        big_int large_big_int;
-        large_big_int.int_group_pointer = (unsigned int *) malloc(sizeof(unsigned int) * 8000);
-        large_big_int.size = 8000;
-        for (int relay = 0; relay < large_big_int.size; relay++) {
-            large_big_int.int_group_pointer[relay] = 8000;
-        }
-        unsigned int comparator = big_int_to_int(large_big_int);
-        assert(8000 == comparator);
-        destroyBigInt(large_big_int);
-        fprintf(stdout, "%s", "\nbig_int to int testing complete. If there is a desire to test fibonacci,\n"
-                              "It can be called in int main(). Make sure to use destroyBigInt() for the return of the\n"
-                              "fibonacci big_int once finished.\n");
-
+    big_int big_int_add_to_test = make_big_int_empty_large(6);
+    for (int u = 0; u < big_int_add_to_test.size; u++) {
+        big_int_add_to_test.int_group_pointer[u] = 4294967295;
     }
+    big_int big_int_add_to_test_second = make_big_int_from_int(70);
+    big_int_add_to(&big_int_add_to_test, big_int_add_to_test_second);
+    fprintf(stdout, "%s", "Printed attempted result:\n");
+    print_big_int(big_int_add_to_test);
+//    print_big_int(big_int_add_to_test_second);
+    big_int expected_result = make_big_int_empty_large(7);
+    for (int i = 0; i < expected_result.size; i++) {
+        if (i == 0) {
+            expected_result.int_group_pointer[i] = 69;
+        } else if (i == 6) {
+            expected_result.int_group_pointer[i] = 1;
+        } else {
+            expected_result.int_group_pointer[i] = 0;
+        }
+    }
+    fprintf(stdout, "%s", "Expected result:\n");
+    print_big_int(expected_result);
+    assert(isEqual(expected_result, big_int_add_to_test) == 1);
+    destroyBigInt(big_int_add_to_test);
+    destroyBigInt(big_int_add_to_test_second);
+    destroyBigInt(expected_result);
+
+    fprintf(stdout, "%s", "First add to test is successful!\n\nSecond test of add_to.\nAdding a big_int with"
+                          " 5 2^31 to a big_int with 4 2^31. We expect that the answer will be of size 5.\n\n");
+    big_int added_to = make_big_int_empty_large(4);
+    for (int z = 0; z < added_to.size; z++) {
+        added_to.int_group_pointer[z] = 2147483648;
+    }
+//    print_big_int(added_to);
+    big_int to_adder = make_big_int_empty_large(5);
+    for (int z = 0; z < to_adder.size; z++) {
+        to_adder.int_group_pointer[z] = 2147483648;
+    }
+//    print_big_int(to_adder);
+    fprintf(stdout, "%s", "\n\n\nTesting out adder...\n");
+    fprintf(stdout, "%s", "Expected result:\n");
+    big_int verify_add_to = big_int_add(to_adder, added_to);
+    print_big_int(verify_add_to);
+    big_int_add_to(&added_to, to_adder);
+    destroyBigInt(to_adder);
+    fprintf(stdout, "%s", "Attempted Result:\n");
+    print_big_int(added_to);
+    big_int add_to_solution = make_big_int_empty_large(5);
+    for (int b = 0; b < add_to_solution.size; b++) {
+        if (b == 0) {
+            add_to_solution.int_group_pointer[b] = 0;
+        } else if (b <= 3) {
+            add_to_solution.int_group_pointer[b] = 1;
+        } else {
+            add_to_solution.int_group_pointer[b] = 2147483649;
+        }
+    }
+//    print_big_int(add_to_solution);
+    assert(isEqual(add_to_solution, added_to) == 1 && isEqual(added_to, verify_add_to) == 1);
+    destroyBigInt(added_to);
+    destroyBigInt(add_to_solution);
+    destroyBigInt(verify_add_to);
+    fprintf(stdout, "%s",
+            "Test Successful.\n\nThird add to test. Adding to big_ints of same size of 5 with uint maxes.\n\n");
+    big_int big_int_added_to_three;
+    big_int_added_to_three.int_group_pointer = (unsigned int *) malloc(sizeof(unsigned int) * 5);
+    big_int_added_to_three.size = 5;
+    for (int c = 0; c < big_int_added_to_three.size; c++) {
+        big_int_added_to_three.int_group_pointer[c] = 4294967295;
+    }
+    big_int big_int_add_to_four;
+    big_int_add_to_four.int_group_pointer = (unsigned int *) malloc(sizeof(unsigned int) * 5);
+    big_int_add_to_four.size = 5;
+    for (int c = 0; c < big_int_added_to_three.size; c++) {
+        big_int_add_to_four.int_group_pointer[c] = 4294967295;
+    }
+    big_int solution_four = big_int_add(big_int_added_to_three, big_int_add_to_four);
+    big_int_add_to(&big_int_added_to_three, big_int_add_to_four);
+    fprintf(stdout, "%s", "Expected Result:\n");
+    print_big_int(solution_four);
+    fprintf(stdout, "%s", "Attempted Result:\n");
+    print_big_int(big_int_added_to_three);
+    assert(isEqual(big_int_added_to_three, solution_four) == 1);
+    destroyBigInt(big_int_added_to_three);
+    destroyBigInt(solution_four);
+    destroyBigInt(big_int_add_to_four);
+    fprintf(stdout, "%s",
+            "_________________________________________________________\nWorking on Quick Extend Test. Extending a big_int with size 5 and all ones with a big_int of size 3 and all tens.\n\n");
+    big_int big_extend = make_big_int_empty_large(5);
+    for (int c = 0; c < big_extend.size; c++) {
+        big_extend.int_group_pointer[c] = 1;
+    }
+    big_int big_extender = make_big_int_empty_large(3);
+    for (int c = 0; c < big_extender.size; c++) {
+        big_extender.int_group_pointer[c] = 10;
+    }
+    big_extend = big_int_extendByBigInt(big_extend, big_extender);
+    fprintf(stdout, "%s", "Attempted Result:\n");
+    print_big_int(big_extend);
+    big_int extend_solution = make_big_int_empty_large(8);
+    for (int c = 0; c < extend_solution.size; c++) {
+        if (c < 5) {
+            extend_solution.int_group_pointer[c] = 1;
+        } else {
+            extend_solution.int_group_pointer[c] = 10;
+        }
+    }
+    fprintf(stdout, "%s", "Expected Result:\n");
+    print_big_int(extend_solution);
+    assert(isEqual(big_extend, extend_solution) == 1);
+    destroyBigInt(big_extend);
+    destroyBigInt(extend_solution);
+
+    fprintf(stdout, "%s",
+            "Test passed!\n\n_________________________________________________________\nTesting out isZero and comparator functions.\n");
+    big_int zeroBigInt = make_big_int_from_int(0);
+    print_big_int(zeroBigInt);
+    assert(isZero(zeroBigInt) == 1);
+    fprintf(stdout, "%s", "\nZero test passed!\n");
+    destroyBigInt(zeroBigInt);
+
+    fprintf(stdout, "%s",
+            "\nSecond Zero test for a corner case where all of the places in a big_int are zero, but\n"
+            "big_int's size is greater than 0. In this case, the size of this big_int is 1000.\n");
+    big_int big_int_zero;
+    big_int_zero.int_group_pointer = (unsigned int *) malloc(1000 * sizeof(unsigned int));
+    big_int_zero.size = 1000;
+    for (int a = 0; a < big_int_zero.size; a++) {
+        big_int_zero.int_group_pointer[a] = 0;
+    }
+    assert(isZero(big_int_zero));
+    destroyBigInt(big_int_zero);
+    fprintf(stdout, "%s", "\nSecond zero test passed!\n");
+    big_int greaterBigInt = make_big_int();
+    greaterBigInt.int_group_pointer = (unsigned int *) malloc(100 * sizeof(unsigned int));
+    greaterBigInt.size = 100;
+    for (int g = 0; g < greaterBigInt.size; g++) {
+        greaterBigInt.int_group_pointer[g] = 800;
+    }
+    fprintf(stdout, "%s", "\nLarger Big_int: 100 places with the number 800\n");
+    // print_big_int(greaterBigInt);
+    big_int lesserBigInt = make_big_int();
+    lesserBigInt.int_group_pointer = (unsigned int *) malloc(sizeof(unsigned int) * 100);
+    lesserBigInt.size = 99;
+    for (int g = 0; g < lesserBigInt.size; g++) {
+        lesserBigInt.int_group_pointer[g] = 799;
+    }
+    fprintf(stdout, "%s", "\nSmaller Big_int: 99 places with the number 799\n");
+    // print_big_int(lesserBigInt);
+    assert(isGreater(greaterBigInt, lesserBigInt) == 1);
+    fprintf(stdout, "%s", "\nGreater-than test passed!\nEquality Test:");
+    destroyBigInt(greaterBigInt);
+    destroyBigInt(lesserBigInt);
+
+    big_int equalOne;
+    big_int equalTwo;
+    equalOne.int_group_pointer = (unsigned int *) malloc(9000 * sizeof(unsigned int));
+    equalOne.size = 9000;
+    equalTwo.int_group_pointer = (unsigned int *) malloc(9000 * sizeof(unsigned int));
+    equalTwo.size = 9000;
+    for (int n = 0; n < equalOne.size; n++) {
+        equalOne.int_group_pointer[n] = 10000;
+    }
+    fprintf(stdout, "%s", "\nFirst term in equality: 9000 places with the number 10000\n");
+    // print_big_int(equalOne);
+    for (int n = 0; n < equalTwo.size; n++) {
+        equalTwo.int_group_pointer[n] = 10000;
+    }
+    fprintf(stdout, "%s", "\nSecond term in equality: 9000 places with the number 10000\n");
+    // print_big_int(equalTwo);
+    assert(isEqual(equalOne, equalTwo) == 1);
+    fprintf(stdout, "%s", "\nEquality test passed.\nNow lesser-than test.\n");
+    destroyBigInt(equalOne);
+    destroyBigInt(equalTwo);
+
+    big_int lesserThan;
+    big_int greaterThan;
+    lesserThan.int_group_pointer = (unsigned int *) malloc(100000 * sizeof(unsigned int));
+    lesserThan.size = 100000;
+    for (int t = 0; t < lesserThan.size; t++) {
+        if (t == 0) {
+            lesserThan.int_group_pointer[t] = 1999999;
+        } else {
+            lesserThan.int_group_pointer[t] = 2000000;
+        }
+    }
+    fprintf(stdout, "%s", "\nFirst Term is 99999 places with 2 million and the last place with 1.999 million.\n");
+    greaterThan.int_group_pointer = (unsigned int *) malloc(100000 * sizeof(unsigned int));
+    greaterThan.size = 100000;
+    for (int t = 0; t < greaterThan.size; t++) {
+        greaterThan.int_group_pointer[t] = 2000000;
+    }
+    fprintf(stdout, "%s", "\nSecond Term is 100000 places with 2 million.\n");
+    assert(isLesser(lesserThan, greaterThan) == 1);
+    destroyBigInt(lesserThan);
+    destroyBigInt(greaterThan);
+    fprintf(stdout, "%s",
+            "\nLesser than test complete. All comparators tested!\nNow big_int to unsigned int testing.\nThis test "
+            "has a big_int with 8000 places with the number 8000.\nbig_int to int will print something saying it "
+            "could only output the last spot if one of the spots\nhigher than zero are greater than zero.\n");
+    big_int large_big_int;
+    large_big_int.int_group_pointer = (unsigned int *) malloc(sizeof(unsigned int) * 8000);
+    large_big_int.size = 8000;
+    for (int relay = 0; relay < large_big_int.size; relay++) {
+        large_big_int.int_group_pointer[relay] = 8000;
+    }
+    unsigned int comparator = big_int_to_int(large_big_int);
+    assert(8000 == comparator);
+    destroyBigInt(large_big_int);
+    fprintf(stdout, "%s", "\nbig_int to int testing complete. If there is a desire to test fibonacci,\n"
+                          "It can be called in int main(). Make sure to use destroyBigInt() for the return of the\n"
+                          "fibonacci big_int once finished.\nIn the testsuite() we are calling the 80th number in the fib sequence.\n");
+    big_int fibo_test = big_int_Fibo(80);
+    print_big_int(fibo_test);
+    destroyBigInt(fibo_test);
 }
+
 
 
 

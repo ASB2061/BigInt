@@ -2,6 +2,14 @@
 // Created by davew on 10/12/21.
 //
 
+/**
+ * The main.cpp file of the bigint project. Found inside are the files big_int.h and doubleint.h, both headers to c and
+ * c++ classes respectively. big_int.h stores big_int, a variable that increases dynamically in value and can store far
+ * higher numbers than any of the built in data types like int, unsigned int, long or double. While big_int can adjust
+ * precision, DoubleInt simply doubles the precision of the unsigned int and allows it to store up to two places with
+ * the unsigned int max which is about 1.8446744073709551616 × 10^19 when shown in hexadecimal form.
+ */
+
 
 #include <iostream>  // access to I.O. Streams library, for std::cout and std::endl
 #include "SafeInt.h"
