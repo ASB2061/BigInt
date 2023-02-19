@@ -36,7 +36,7 @@ int main() {
 
     big_int_test_suite();
     fprintf(stdout, "%s", "_____________________________________________________________\n");
-    unsigned int fiboInput = 1000;
+    unsigned int fiboInput = 100000;
     std::cout << "Testing the " << fiboInput << " fibonacci value" << std::endl;
     big_int output_for_Fibo = big_int_Fibo(fiboInput);
     print_big_int(output_for_Fibo);

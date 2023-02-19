@@ -74,7 +74,7 @@ big_int make_big_int_empty_large(unsigned int i) {
 }
 
 /**
- * Simply redirects to the extend function. Note that these big_ints are freed when used, so be sure that this is the last time that you are usign them.
+ * Simply redirects to the extend function. Note that these big_ints are freed when used, so be sure that this is the last time that you are using them.
  * @param first
  * @param second
  * @return
